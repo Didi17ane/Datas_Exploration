@@ -19,7 +19,6 @@ import altair as alt
 
 import requests
 
-from sklearn.svm import SVC
 from streamlit_option_menu import option_menu
 from streamlit_navigation_bar import st_navbar
 import pages as pg
