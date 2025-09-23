@@ -8,3 +8,6 @@ numerize
 requests
 joblib
 pages
+streamlit_elements
+streamlit_option_menu
+streamlit_navigation_bar
