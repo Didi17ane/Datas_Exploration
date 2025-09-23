@@ -1,0 +1,10 @@
+streamlit
+pandas
+seaborn
+plotly
+matplotlib
+altair
+numerize
+requests
+joblib
+pages
