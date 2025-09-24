@@ -11,3 +11,6 @@ pages
 streamlit_elements
 streamlit_option_menu
 streamlit_navigation_bar
+pydeck
+folium
+streamlit_folium
