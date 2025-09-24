@@ -294,4 +294,4 @@ if region:
     st.subheader("📋 Données filtrées")
     st.dataframe(data, use_container_width=True)
     
-    st.markdown("✅ Ce tableau de bord peut être enrichi avec d’autres bases (ENV2008, RGPH2014) pour élargir la vision et construire un **proxy de scoring locatif**.")   
+    st.markdown("✅ Ce tableau de bord peut être enrichi avec d’autres bases (NSIA, BHCI, RGPH2021) pour élargir la vision et construire un **proxy de scoring locatif**.")   
