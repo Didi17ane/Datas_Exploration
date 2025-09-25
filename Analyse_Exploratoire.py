@@ -227,6 +227,7 @@ if region:
     
     with tab2:
         c1, c2 = st.columns(2)
+        ca1, ca2 = st.columns(2)
         with c1:
             st.subheader(":green[**📈 Revenu moyen par tranche d’âge**]")
             st.divider()
@@ -235,19 +236,18 @@ if region:
             data.groupby("age_grp")["mean_rev"].mean().plot(kind="bar", ax=ax, color="skyblue")
             ax.set_ylabel("Revenu moyen (FCFA)")
             st.pyplot(fig)
-
-        # ----------------------------------------------------------------------------------
-
-            st.subheader(":green[**🏠 Répartition statuts logement**]")
-            st.divider()
-            
-            fig, ax = plt.subplots()
-            data[["proprio_titre","proprio_sans","locataire","autre_logement"]].mean().plot(
-                kind="bar", ax=ax, color=["green","orange","blue","grey"]
-            )
-            ax.set_ylabel("Proportion (%)")
-            st.pyplot(fig)
+       
         with c2:
+            
+        # --------------------------------------------------------------------------------
+            st.subheader(":green[**📈 Répartition Taux bancarisation**]")
+            st.divider()
+
+            fig, ax = plt.subplots()
+            data.groupby("age_grp")["mean_banked"].mean().plot(kind="bar", ax=ax, color=["red", "orange","blue","green","grey", "purple", "skyblue"])
+            ax.set_ylabel("Taux de bancarisation (%)")
+            st.pyplot(fig)
+        with ca1:
             st.subheader(":green[**🏠 Répartition statuts logement**]")
             st.divider()
             
@@ -256,8 +256,9 @@ if region:
                 kind="bar", ax=ax, color=["green","orange","blue","grey"]
             )
             ax.set_ylabel("Proportion (%)")
-            st.pyplot(fig)
-        # --------------------------------------------------------------------------------
+            st.pyplot(fig) 
+             
+        with ca2:   
             st.subheader(":green[**💼 Assurance et emploi formel**]")
             st.divider()
             
