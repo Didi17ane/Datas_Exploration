@@ -55,6 +55,6 @@ def sidebar(df_fin):
         show_forecasts = st.checkbox("Show Forecasts", value=False)
         
         st.divider()
-        st.markdown("© 2025 TYLIMMO AFRICA")
+        st.markdown("© 2025 DIATA AFRICA SAS")
 
     return region,age_grp,sexe,mstat,risque,reco,data
