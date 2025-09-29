@@ -28,9 +28,6 @@ from streamlit_folium import st_folium
 
 import pydeck as pdk
 
-from Utilities.Sidebar import *
-from Utilities.globale import *
-from Utilities.fintech import *
 # ___________________________________________
 
 
@@ -73,7 +70,7 @@ st.markdown('<h1 class="main-header">Analytics Dashboard</h1>', unsafe_allow_htm
 
 
 # --- Charger agrégats
-df_ehcvm = pd.read_csv("dataset_scoring_bancaire_fusion.csv") 
+df_ehcvm = pd.read_csv("AGG_EHCVM2021_V2.csv") 
 
 
 # --- Pré-traitements
@@ -102,9 +99,55 @@ print(f"\n***** Dataset de traitement : \n {df_fin}")
 # ------------------------- Ajout de la Sidebar
 
 with st.sidebar:
-    region,age_grp,sexe,mstat,risque,reco,data = sidebar(df_fin)
+    # st.image("", width=200)
+    st.title("SCORING Dashboard")
+    
+    st.divider()
 
-# ------------------------ PAGE PRINCIPALE
+    # Bases de données
+    st.subheader("Base de données")
+    database = st.multiselect(
+        "Database",
+        options=["AGG_EHCVM2021_V2.csv", ""],
+        default=["AGG_EHCVM2021_V2.csv"]
+    )
+    
+    # Filters
+    st.subheader("Filters")
+    listes = sorted(df_fin["region"].unique().tolist())
+    options = ["Toutes"] + listes 
+    print(listes)
+    region = st.multiselect(
+        "Région",
+        options=options,
+        default=["Toutes"]
+    )
+    # region = st.sidebar.selectbox("Région", ["Toutes"] + sorted(df_fin["region"].unique().tolist()))
+    age_grp = st.sidebar.selectbox("Tranche d’âge", ["Toutes"] + sorted(df_fin["age_grp"].unique().tolist()))
+    sexe = st.sidebar.selectbox("Sexe", ["Tous"] + sorted(df_fin["sexe"].unique().tolist()))
+    mstat = st.sidebar.selectbox("Statut matrimonial", ["Tous"] + sorted(df_fin["mstat"].unique().tolist()))
+    
+    data = df_fin.copy()
+    if "Toutes" not in region:
+        data = data[data["region"].isin(region)]
+    # if region != "Toutes":
+      #  data = data[data["region"] == region]
+    if age_grp != "Toutes":
+        data = data[data["age_grp"] == age_grp]
+    if sexe != "Tous":
+        data = data[data["sexe"] == sexe]
+    if mstat != "Tous":
+        data = data[data["mstat"] == mstat]
+
+    
+    # Advanced options
+    st.subheader("Advanced Options")
+    show_targets = st.checkbox("Show Targets", value=True)
+    show_forecasts = st.checkbox("Show Forecasts", value=False)
+    
+    st.divider()
+    st.markdown("© 2025 TYLIMMO AFRICA")
+
 
 if region:
         
@@ -138,8 +181,6 @@ if region:
            
         )
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if femme == 0:
-            pourc_fem = 0
         st.metric("% Femmes", f"{pourc_fem} %")
     
     with col3:
@@ -151,8 +192,6 @@ if region:
             value=f"{homme} ",
         )
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if homme == 0:
-            pour_hom = 0
         st.metric("% Hommes", f"{pour_hom} %")
         
     with col4:
@@ -171,73 +210,55 @@ if region:
     st.markdown('</div>', unsafe_allow_html=True)
     
     # -----------------------  NAVIGATIONS PAGES ------------------
-
-
     
     st.subheader("PERFORMANCES")
-    st.markdown("")
-    st.markdown("Cette vision globale permet d'identifier les zones fortes/faibles, profils majoritaires, contrastes majeurs. Incontournable avant tout projet de scoring.")
     tab1, tab2, tab3 = st.tabs(["Vue générale de la population", "KPIs locatifs & financiers", "Exploration interactive"])
-    
-    tab_region = tabRegion(data)
-    
-    # --------------------------- 1ere page ---------------------
     
     with tab1:
         c1, c2 = st.columns(2)
-        with c1:
-            # Pyramide des âges
-            st.subheader(":green[**Pyramide des âges**]")
-            pyramide(data)
-        with c2:
-            # Zoom région: répartition des effectifs et indicateurs
-            st.subheader(":green[**Comparaison des régions - Population & Revenus**]")
-            fig = repartition(tab_region)
-            st.pyplot(fig)
-                
-        # Groupes d’âge : population et revenu médian
-        st.subheader(":green[**Effectifs & revenu moyen par âge**]")
-            
-        age_grp = data.groupby("age_grp").agg(population=("nbr_indv","sum"), revenu_moy=("mean_rev","mean")).reset_index()
-        st.dataframe(age_grp)
-
-    # --------------------------- 2e page ---------------------
+        st.subheader("Pyramide des âges")
+        age_sex = data.groupby(["age_grp","sexe"])["nbr_indv"].sum().unstack().fillna(0)
+        age_sex.plot(kind="barh", stacked=True)
+        st.pyplot(plt)
+    
+    
+    
+    # ------------------------------------------------
     
     with tab2:
-        
-        
-       # st.subheader(":green[**📈 Effectifs & Revenu moyen par tranche d’âge**]")
-        # Répartition par région et indicateurs clés
-        st.subheader(":green[**📈 Répartition régionale**]")
-        st.divider()
-        
-        st.dataframe(tab_region)
-        
         c1, c2 = st.columns(2)
+        ca1, ca2 = st.columns(2)
         with c1:
-            # Revenu moyen par tranche d’âge
-            st.subheader(":green[**Revenu moyen par tranche d’âge**]")
-            st.divider()
-
-            fig = revenu(data)
-            st.pyplot(fig)
-
-        with c2:
-            
-            st.subheader(":green[**📈 Répartition Taux bancarisation**]")
+            st.subheader(":green[**📈 Revenu moyen par tranche d’âge**]")
             st.divider()
             
             fig, ax = plt.subplots()
+            data.groupby("age_grp")["mean_rev"].mean().plot(kind="bar", ax=ax, color="skyblue")
+            ax.set_ylabel("Revenu moyen (FCFA)")
+            st.pyplot(fig)
+       
+        with c2:
+            
+        # --------------------------------------------------------------------------------
+            st.subheader(":green[**📈 Répartition Taux bancarisation**]")
+            st.divider()
+
+            fig, ax = plt.subplots()
             data.groupby("age_grp")["mean_banked"].mean().plot(kind="bar", ax=ax, color=["red", "orange","blue","green","grey", "purple", "skyblue"])
             ax.set_ylabel("Taux de bancarisation (%)")
-            st.pyplot(fig) 
-        
-        # --------------------------------------------------------------------------------
-
-        ca1, ca2 = st.columns(2)
-        
+            st.pyplot(fig)
         with ca1:
+            st.subheader(":green[**🏠 Répartition statuts logement**]")
+            st.divider()
             
+            fig, ax = plt.subplots()
+            data[["proprio_titre","proprio_sans","locataire","autre_logement"]].mean().plot(
+                kind="bar", ax=ax, color=["green","orange","blue","grey"]
+            )
+            ax.set_ylabel("Proportion (%)")
+            st.pyplot(fig) 
+             
+        with ca2:   
             st.subheader(":green[**💼 Assurance et emploi formel**]")
             st.divider()
             
@@ -245,64 +266,25 @@ if region:
             data[["empl_formel","assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
             ax.set_ylabel("Proportion (%)")
             st.pyplot(fig)
-
-        with ca2: 
-            # Statuts logement moyens nationaux
-            st.subheader(":green[**🏠 Répartition statuts logement**]")
-            st.divider()
             
-            fig, ax = plt.subplots()
-            statut_cols = ["proprio_titre","proprio_sans","locataire","autre_logement"]
-            data[statut_cols].mean().plot(
-                kind="bar", ax=ax, color=["green","orange","blue","grey"]
-            )
-            ax.set_ylabel("Proportion (%)")
-            st.pyplot(fig) 
-
-        # --------------------------------------------------------
+        # Exemple avec revenu moyen
+        df_region = data.groupby("region")["mean_rev"].mean().reset_index()
         
-                
-
-    # --------------------------- 3e page ---------------------
-        
+        st.pydeck_chart(pdk.Deck(
+            map_style="mapbox://styles/mapbox/light-v9",
+            initial_view_state=pdk.ViewState(latitude=7.54, longitude=-5.55, zoom=6),
+            layers=[
+                pdk.Layer(
+                    "GeoJsonLayer",
+                    data="geoBoundaries-CIV-ADM1.geojson",
+                    get_fill_color="[255, (1-mean_rev/200000)*255, 0]",  # gradient selon revenu
+                    pickable=True,
+                ),
+            ],
+        ))
     with tab3:
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("Score moyen bancaire", round(data["score_bancaire_optimise"].mean(),1))
-        with col2:
-            st.metric("% Accords crédit (recommandé+conditionnel)", 
-                      round(100*data[data["recommandation_credit"].str.contains("ACCORD")]["nbr_indv"].sum()/max(1,data["nbr_indv"].sum()),1))
-        with col3:
-            st.metric("% Profils très à risque", 
-                      round(100*data[data["categorie_risque_bancaire"]=="Risque_Tres_Eleve"]["nbr_indv"].sum()/max(1,data["nbr_indv"].sum()),1))
-
         c1, c2 = st.columns(2)
-        with c1:
-            # Visualisation de la distribution du score bancaire 
-            st.subheader("Distribution du score bancaire par profil")
-            fig, ax = plt.subplots()
-            data.groupby("categorie_risque_bancaire")["nbr_indv"].sum().plot(kind="bar", color="crimson", ax=ax)
-            ax.set_ylabel("Population")
-            ax.set_xlabel("Catégorie de risque")
-            st.pyplot(fig)
-
-        with c2:
-            # Mix & analyse scoring : origine du risque
-            st.subheader("Répartition des recommandations de crédit")
-            fig, ax = plt.subplots()
-            data.groupby('recommandation_credit')["nbr_indv"].sum().plot.pie(
-                autopct='%1.1f%%', ax=ax, colors=["green","orange","gray","red"])
-            ax.set_ylabel("")
-            st.pyplot(fig)
-
-        # ------------------------------------------
-        
-        # Exploration avancée : score par statut logement/profil emploi
-        st.subheader("Scoring bancaire moyen par statut de logement")
-        stats = data.groupby("statut_logement")["score_bancaire_optimise"].mean().sort_values()
-        st.bar_chart(stats)
-
+    
     
     
     # =====================
@@ -313,4 +295,4 @@ if region:
     st.subheader("📋 Données filtrées")
     st.dataframe(data, use_container_width=True)
     
-    st.markdown("✅ Ce tableau de bord peut être enrichi avec d’autres bases (NSIA, BHCI, RGPH2021) pour élargir la vision et construire un **proxy de scoring locatif**.")
+    st.markdown("✅ Ce tableau de bord peut être enrichi avec d’autres bases (NSIA, BHCI, RGPH2021) pour élargir la vision et construire un **proxy de scoring locatif**.")   
