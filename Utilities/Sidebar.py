@@ -3,7 +3,7 @@ import streamlit as st
 def sidebar(df_fin):
     with st.sidebar:
         # st.image("", width=200)
-        st.title("SCORING Dashboard")
+        st.title("Dashboard DIATA.ai")
         
         st.divider()
     
