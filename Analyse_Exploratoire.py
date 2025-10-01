@@ -106,211 +106,210 @@ with st.sidebar:
 
 # ------------------------ PAGE PRINCIPALE
 
-if region:
-        
-    # ------------------------------ KPIs
-    # KPIs
-    st.subheader("Key Performance Indicators")
-    col1, col2, col3, col4 = st.columns(4)
     
-    
-    with col1:
-        population = data["nbr_indv"].sum()
-        st.metric(
-            label="Total Population",
-            value=f"{population} ",   
-        )
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        empl = round(data['empl_formel'].mean()*100, 1)
-        if np.isnan(empl):
-            empl=0
-        st.metric("Emploi formel", f"{empl} %")
-        # print(f"bak :{empl}")
-        # print(type(empl).__name__)
-        
-    with col2:
-        df_femme = data[data["sexe"]=="Féminin"]
-        femme = df_femme["nbr_indv"].sum()
-        pourc_fem = round((femme / population)*100,1)
-        st.metric(
-            label="Total femmes",
-            value=f"{femme}",
-           
-        )
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if femme == 0:
-            pourc_fem = 0
-        st.metric("% Femmes", f"{pourc_fem} %")
-    
-    with col3:
-        df_homme = data[data["sexe"]=="Masculin"]
-        homme = df_homme["nbr_indv"].sum()
-        pour_hom = round((homme / population)*100,1)
-        st.metric(
-            label="Total hommes",
-            value=f"{homme} ",
-        )
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if homme == 0:
-            pour_hom = 0
-        st.metric("% Hommes", f"{pour_hom} %")
-        
-    with col4:
-        rev = round(data['mean_rev'].mean(), 0)
-        if np.isnan(rev):
-            rev=0    
-        st.metric("Revenu moyen (FCFA)", f"{rev:,.0f}")
-        
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        bank = round(data['mean_banked'].mean()*100, 1)
-        if np.isnan(bank):
-            bank=0    
-        st.metric("Bancarisation", f"{bank} %")
-        
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # -----------------------  NAVIGATIONS PAGES ------------------
+# ------------------------------ KPIs
+# KPIs
+st.subheader("Key Performance Indicators")
+col1, col2, col3, col4 = st.columns(4)
 
 
+with col1:
+    population = data["nbr_indv"].sum()
+    st.metric(
+        label="Total Population",
+        value=f"{population:,.0f} ",   
+    )
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    empl = round(data['empl_formel'].mean()*100, 1)
+    if np.isnan(empl):
+        empl=0
+    st.metric("Emploi formel", f"{empl} %")
+    # print(f"bak :{empl}")
+    # print(type(empl).__name__)
     
-    st.subheader("PERFORMANCES")
-    st.markdown("")
-    st.markdown("Cette vision globale permet d'identifier les zones fortes/faibles, profils majoritaires, contrastes majeurs. Incontournable avant tout projet de scoring.")
-    tab1, tab2, tab3 = st.tabs(["Vue générale de la population", "KPIs locatifs & financiers", "Exploration interactive"])
+with col2:
+    df_femme = data[data["sexe"]=="Féminin"]
+    femme = df_femme["nbr_indv"].sum()
+    pourc_fem = round((femme / population)*100,1)
+    st.metric(
+        label="Total femmes",
+        value=f"{femme:,.0f}",
+       
+    )
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    if femme == 0:
+        pourc_fem = 0
+    st.metric("% Femmes", f"{pourc_fem} %")
+
+with col3:
+    df_homme = data[data["sexe"]=="Masculin"]
+    homme = df_homme["nbr_indv"].sum()
+    pour_hom = round((homme / population)*100,1)
+    st.metric(
+        label="Total hommes",
+        value=f"{homme:,.0f} ",
+    )
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    if homme == 0:
+        pour_hom = 0
+    st.metric("% Hommes", f"{pour_hom} %")
     
-    tab_region = tabRegion(data)
+with col4:
+    rev = round(data['mean_rev'].mean(), 0)
+    if np.isnan(rev):
+        rev=0    
+    st.metric("Revenu moyen (FCFA)", f"{rev:,.0f}")
     
-    # --------------------------- 1ere page ---------------------
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    bank = round(data['mean_banked'].mean()*100, 1)
+    if np.isnan(bank):
+        bank=0    
+    st.metric("Bancarisation", f"{bank} %")
     
-    with tab1:
-        c1, c2 = st.columns(2)
-        with c1:
-            # Pyramide des âges
-            st.subheader(":green[**Pyramide des âges**]")
-            pyramide(data)
-        with c2:
-            # Zoom région: répartition des effectifs et indicateurs
-            st.subheader(":green[**Comparaison des régions - Population & Revenus**]")
-            fig = repartition(tab_region)
-            st.pyplot(fig)
-                
-        # Groupes d’âge : population et revenu médian
-        st.subheader(":green[**Effectifs & revenu moyen par âge**]")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# -----------------------  NAVIGATIONS PAGES ------------------
+
+
+
+st.subheader("PERFORMANCES")
+st.markdown("")
+st.markdown("Cette vision globale permet d'identifier les zones fortes/faibles, profils majoritaires, contrastes majeurs. Incontournable avant tout projet de scoring.")
+tab1, tab2, tab3 = st.tabs(["Vue générale de la population", "KPIs locatifs & financiers", "Exploration interactive"])
+
+tab_region = tabRegion(data)
+
+# --------------------------- 1ere page ---------------------
+
+with tab1:
+    c1, c2 = st.columns(2)
+    with c1:
+        # Pyramide des âges
+        st.subheader(":green[**Pyramide des âges**]")
+        pyramide(data)
+    with c2:
+        # Zoom région: répartition des effectifs et indicateurs
+        st.subheader(":green[**Comparaison des régions - Population & Revenus**]")
+        fig = repartition(tab_region)
+        st.pyplot(fig)
             
-        age_grp = data.groupby("age_grp").agg(population=("nbr_indv","sum"), revenu_moy=("mean_rev","mean")).reset_index()
-        st.dataframe(age_grp)
+    # Groupes d’âge : population et revenu médian
+    st.subheader(":green[**Effectifs & revenu moyen par âge**]")
+        
+    age_grp = data.groupby("age_grp").agg(population=("nbr_indv","sum"), revenu_moy=("mean_rev","mean")).reset_index()
+    st.dataframe(age_grp)
 
-    # --------------------------- 2e page ---------------------
+# --------------------------- 2e page ---------------------
+
+with tab2:
     
-    with tab2:
+    
+   # st.subheader(":green[**📈 Effectifs & Revenu moyen par tranche d’âge**]")
+    # Répartition par région et indicateurs clés
+    st.subheader(":green[**📈 Répartition régionale**]")
+    st.divider()
+    
+    st.dataframe(tab_region)
+    
+    c1, c2 = st.columns(2)
+    with c1:
+        # Revenu moyen par tranche d’âge
+        st.subheader(":green[**Revenu moyen par tranche d’âge**]")
+        st.divider()
+
+        fig = revenu(data)
+        st.pyplot(fig)
+
+    with c2:
         
-        
-       # st.subheader(":green[**📈 Effectifs & Revenu moyen par tranche d’âge**]")
-        # Répartition par région et indicateurs clés
-        st.subheader(":green[**📈 Répartition régionale**]")
+        st.subheader(":green[**📈 Répartition Taux bancarisation**]")
         st.divider()
         
-        st.dataframe(tab_region)
-        
-        c1, c2 = st.columns(2)
-        with c1:
-            # Revenu moyen par tranche d’âge
-            st.subheader(":green[**Revenu moyen par tranche d’âge**]")
-            st.divider()
-
-            fig = revenu(data)
-            st.pyplot(fig)
-
-        with c2:
-            
-            st.subheader(":green[**📈 Répartition Taux bancarisation**]")
-            st.divider()
-            
-            fig, ax = plt.subplots()
-            data.groupby("age_grp")["mean_banked"].mean().plot(kind="bar", ax=ax, color=["red", "orange","blue","green","grey", "purple", "skyblue"])
-            ax.set_ylabel("Taux de bancarisation (%)")
-            st.pyplot(fig) 
-        
-        # --------------------------------------------------------------------------------
-
-        ca1, ca2 = st.columns(2)
-        
-        with ca1:
-            
-            st.subheader(":green[**💼 Assurance et emploi formel**]")
-            st.divider()
-            
-            fig, ax = plt.subplots()
-            data[["empl_formel","assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
-            ax.set_ylabel("Proportion (%)")
-            st.pyplot(fig)
-
-        with ca2: 
-            # Statuts logement moyens nationaux
-            st.subheader(":green[**🏠 Répartition statuts logement**]")
-            st.divider()
-            
-            fig, ax = plt.subplots()
-            statut_cols = ["proprio_titre","proprio_sans","locataire","autre_logement"]
-            data[statut_cols].mean().plot(
-                kind="bar", ax=ax, color=["green","orange","blue","grey"]
-            )
-            ax.set_ylabel("Proportion (%)")
-            st.pyplot(fig) 
-
-        # --------------------------------------------------------
-        
-                
-
-    # --------------------------- 3e page ---------------------
-        
-    with tab3:
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("Score moyen bancaire", round(data["score_bancaire_optimise"].mean(),1))
-        with col2:
-            st.metric("% Accords crédit (recommandé+conditionnel)", 
-                      round(100*data[data["recommandation_credit"].str.contains("ACCORD")]["nbr_indv"].sum()/max(1,data["nbr_indv"].sum()),1))
-        with col3:
-            st.metric("% Profils très à risque", 
-                      round(100*data[data["categorie_risque_bancaire"]=="Risque_Tres_Eleve"]["nbr_indv"].sum()/max(1,data["nbr_indv"].sum()),1))
-
-        c1, c2 = st.columns(2)
-        with c1:
-            # Visualisation de la distribution du score bancaire 
-            st.subheader("Distribution du score bancaire par profil")
-            fig, ax = plt.subplots()
-            data.groupby("categorie_risque_bancaire")["nbr_indv"].sum().plot(kind="bar", color="crimson", ax=ax)
-            ax.set_ylabel("Population")
-            ax.set_xlabel("Catégorie de risque")
-            st.pyplot(fig)
-
-        with c2:
-            # Mix & analyse scoring : origine du risque
-            st.subheader("Répartition des recommandations de crédit")
-            fig, ax = plt.subplots()
-            data.groupby('recommandation_credit')["nbr_indv"].sum().plot.pie(
-                autopct='%1.1f%%', ax=ax, colors=["green","orange","gray","red"])
-            ax.set_ylabel("")
-            st.pyplot(fig)
-
-        # ------------------------------------------
-        
-        # Exploration avancée : score par statut logement/profil emploi
-        st.subheader("Scoring bancaire moyen par statut de logement")
-        stats = data.groupby("statut_logement")["score_bancaire_optimise"].mean().sort_values()
-        st.bar_chart(stats)
-
+        fig, ax = plt.subplots()
+        data.groupby("age_grp")["mean_banked"].mean().plot(kind="bar", ax=ax, color=["red", "orange","blue","green","grey", "purple", "skyblue"])
+        ax.set_ylabel("Taux de bancarisation (%)")
+        st.pyplot(fig) 
     
-    
-    # =====================
-    # Tableau des données filtrées
-    # =====================
+    # --------------------------------------------------------------------------------
 
+    ca1, ca2 = st.columns(2)
     
-    st.subheader("📋 Données filtrées")
-    st.dataframe(data, use_container_width=True)
+    with ca1:
+        
+        st.subheader(":green[**💼 Assurance et emploi formel**]")
+        st.divider()
+        
+        fig, ax = plt.subplots()
+        data[["empl_formel","assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
+        ax.set_ylabel("Proportion (%)")
+        st.pyplot(fig)
+
+    with ca2: 
+        # Statuts logement moyens nationaux
+        st.subheader(":green[**🏠 Répartition statuts logement**]")
+        st.divider()
+        
+        fig, ax = plt.subplots()
+        statut_cols = ["proprio_titre","proprio_sans","locataire","autre_logement"]
+        data[statut_cols].mean().plot(
+            kind="bar", ax=ax, color=["green","orange","blue","grey"]
+        )
+        ax.set_ylabel("Proportion (%)")
+        st.pyplot(fig) 
+
+    # --------------------------------------------------------
     
-    st.markdown("✅ Ce tableau de bord peut être enrichi avec d’autres bases (NSIA, BHCI, RGPH2021) pour élargir la vision et construire un **proxy de scoring locatif**.")
+            
+
+# --------------------------- 3e page ---------------------
+    
+with tab3:
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Score moyen bancaire", round(data["score_bancaire_optimise"].mean(),1))
+    with col2:
+        st.metric("% Accords crédit (recommandé+conditionnel)", 
+                  round(100*data[data["recommandation_credit"].str.contains("ACCORD")]["nbr_indv"].sum()/max(1,data["nbr_indv"].sum()),1))
+    with col3:
+        st.metric("% Profils très à risque", 
+                  round(100*data[data["categorie_risque_bancaire"]=="Risque_Tres_Eleve"]["nbr_indv"].sum()/max(1,data["nbr_indv"].sum()),1))
+
+    c1, c2 = st.columns(2)
+    with c1:
+        # Visualisation de la distribution du score bancaire 
+        st.subheader("Distribution du score bancaire par profil")
+        fig, ax = plt.subplots()
+        data.groupby("categorie_risque_bancaire")["nbr_indv"].sum().plot(kind="bar", color="crimson", ax=ax)
+        ax.set_ylabel("Population")
+        ax.set_xlabel("Catégorie de risque")
+        st.pyplot(fig)
+
+    with c2:
+        # Mix & analyse scoring : origine du risque
+        st.subheader("Répartition des recommandations de crédit")
+        fig, ax = plt.subplots()
+        data.groupby('recommandation_credit')["nbr_indv"].sum().plot.pie(
+            autopct='%1.1f%%', ax=ax, colors=["green","orange","gray","red"])
+        ax.set_ylabel("")
+        st.pyplot(fig)
+
+    # ------------------------------------------
+    
+    # Exploration avancée : score par statut logement/profil emploi
+    st.subheader("Scoring bancaire moyen par statut de logement")
+    stats = data.groupby("statut_logement")["score_bancaire_optimise"].mean().sort_values()
+    st.bar_chart(stats)
+
+
+
+# =====================
+# Tableau des données filtrées
+# =====================
+
+
+st.subheader("📋 Données filtrées")
+st.dataframe(data, use_container_width=True)
+
+st.markdown("✅ Ce tableau de bord peut être enrichi avec d’autres bases (NSIA, BHCI, RGPH2021) pour élargir la vision et construire un **proxy de scoring locatif**.")
