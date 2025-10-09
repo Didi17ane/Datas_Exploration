@@ -3,7 +3,7 @@ import streamlit as st
 def sidebar(df_fin):
     with st.sidebar:
         # st.image("", width=200)
-        st.title("SCORING Dashboard")
+        st.title("Dashboard DIATA.ai")
         
         st.divider()
     
@@ -17,15 +17,15 @@ def sidebar(df_fin):
         
         # Filters
         st.subheader("Filters")
-        listes = sorted(df_fin["region"].unique().tolist())
-        options = ["Toutes"] + listes 
-        print(listes)
-        region = st.multiselect(
-            "Région",
-            options=options,
-            default=["Toutes"]
-        )
-        # region = st.sidebar.selectbox("Région", ["Toutes"] + sorted(df_fin["region"].unique().tolist()))
+        # listes = sorted(df_fin["region"].unique().tolist())
+        # options = ["Toutes"] + listes 
+        # print(listes)
+        # region = st.multiselect(
+        #    "Région",
+        #    options=options,
+        #    default=["Toutes"]
+        #)
+        region = st.sidebar.selectbox("Région", ["Toutes"] + sorted(df_fin["region"].unique().tolist()))
         age_grp = st.sidebar.selectbox("Tranche d’âge", ["Toutes"] + sorted(df_fin["age_grp"].unique().tolist()))
         sexe = st.sidebar.selectbox("Sexe", ["Tous"] + sorted(df_fin["sexe"].unique().tolist()))
         mstat = st.sidebar.selectbox("Statut matrimonial", ["Tous"] + sorted(df_fin["mstat"].unique().tolist()))
@@ -33,10 +33,10 @@ def sidebar(df_fin):
         reco = st.selectbox("Recommandation crédit", ['Toutes'] + sorted(df_fin['recommandation_credit'].unique().tolist()))
         
         data = df_fin.copy()
-        if "Toutes" not in region:
-            data = data[data["region"].isin(region)]
-        # if region != "Toutes":
-          #  data = data[data["region"] == region]
+        # if "Toutes" not in region:
+        #    data = data[data["region"].isin(region)]
+        if region != "Toutes":
+            data = data[data["region"] == region]
         if age_grp != "Toutes":
             data = data[data["age_grp"] == age_grp]
         if sexe != "Tous":

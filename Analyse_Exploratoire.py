@@ -73,7 +73,7 @@ st.markdown('<h1 class="main-header">Analytics Dashboard</h1>', unsafe_allow_htm
 
 
 # --- Charger agrégats
-df_ehcvm = pd.read_csv("dataset_scoring_bancaire_fusion.csv") 
+df_ehcvm = pd.read_csv("./DATAS/dataset_scoring_bancaire_fusion.csv") 
 
 
 # --- Pré-traitements
@@ -88,7 +88,7 @@ df_fin = df_fin.drop_duplicates()
 
 # --- Affichages en console
 
-print(f"\n***** Premiers lignes : \n {prem_ligne}")
+print(f"\n***** Premieres lignes : \n {prem_ligne}")
 print(f"\n***** Nombres de lignes et colonnes : \n {nbr_value}")
 print(f"\n***** Description des variables : \n {desc}")
 print(f"\n***** Valeurs nulles : \n {null_val}")

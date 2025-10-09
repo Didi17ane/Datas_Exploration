@@ -70,7 +70,7 @@ st.markdown('<h1 class="main-header">Analytics Dashboard</h1>', unsafe_allow_htm
 
 
 # --- Charger agrégats
-df_ehcvm = pd.read_csv("AGG_EHCVM2021_V2.csv") 
+df_ehcvm = pd.read_csv("./DATAS/AGG_EHCVM2021_V2.csv") 
 
 
 # --- Pré-traitements
