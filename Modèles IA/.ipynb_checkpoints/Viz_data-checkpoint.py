@@ -143,11 +143,12 @@ with col1:
 with col2:
     df_femme = data[data["sexe"]=="Féminin"]
     femme = len(df_femme)
-    pourc_fem = round((femme / population)*100,1)
+    
+    if femme != 0:
+        pourc_fem = round((femme / population)*100,1)
     st.metric(
         label="Total femmes",
         value=f"{femme:,.0f}",
-       
     )
     st.markdown('<div class="metric-card">', unsafe_allow_html=True)
     if femme == 0:
@@ -157,7 +158,9 @@ with col2:
 with col3:
     df_homme = data[data["sexe"]=="Masculin"]
     homme = len(df_homme)
-    pour_hom = round((homme / population)*100,1)
+    
+    if homme != 0:
+        pour_hom = round((homme / population)*100,1)
     st.metric(
         label="Total hommes",
         value=f"{homme:,.0f} ",
@@ -198,24 +201,56 @@ with tab1:
     with c1:
         # Pyramide des âges
         st.subheader(":green[**Pyramide des âges**]")
-        # age_sex = data.groupby(["age_grp","sexe"])["nbr_indv"].sum().unstack().fillna(0)
-        # age_sex.plot(kind="barh", stacked=True)
-        # st.pyplot(plt)
+        st.divider()
+        age_sex = data.groupby(["age_grp","sexe"])["region"].count().unstack().fillna(0)
+        age_sex.plot(kind="barh", stacked=True)
+        st.pyplot(plt)
     with c2:
         # Zoom région: répartition des effectifs et indicateurs
-        tab_region = data.groupby("region").agg(population=population,
+        tab_region = data.groupby("region").agg(population=("region", "size"),
                                             revenu_moy=("rev_total_mois","mean"),
                                             bank_moy=("bancarise","mean")).reset_index()
          
         st.subheader(":green[**Comparaison des régions - Population & Revenus**]")
+        st.divider()
         fig, ax = plt.subplots()
-        tab_region.set_index("region")[["population", "rev_total_mois"]].plot(kind="bar", ax=ax, secondary_y="rev_moy")
+        tab_region.set_index("region")[["population", "revenu_moy"]].plot(kind="bar", ax=ax, secondary_y="rev_moy")
 
         st.pyplot(fig)
             
     # Groupes d’âge : population et revenu médian
     st.subheader(":green[**Effectifs & revenu moyen par âge**]")
         
-    age_grp = data.groupby("age_grp").agg(population=population, revenu_moy=("rev_total_mois","mean")).reset_index()
+    age_grp = data.groupby("age_grp").agg(population=("region", "size"), revenu_moy=("rev_total_mois","mean")).reset_index()
     st.dataframe(age_grp)
 
+    ca1, ca2 = st.columns(2)
+    with ca1:
+        # Secteur institutionnel
+        #st.subheader("Secteur institutionnel")
+        #fig, ax = plt.subplots()
+        #data.groupby('branch')["region"].count().plot.pie(
+        #    autopct='%1.1f%%', ax=ax, colors=["green","orange","gray","blue","red","grey","purple","skyblue","yellow"])
+        #ax.set_ylabel("")
+        #st.pyplot(fig)
+        counts = data.groupby('branch')["region"].count()
+        fig, ax = plt.subplots(figsize=(20, 20))
+        ax.pie(counts, labels=counts.index, autopct='%1.1f%%', startangle=90, pctdistance=0.85)
+        centre_circle = plt.Circle((0, 0), 0.70, fc='white')  # cercle blanc au centre
+        fig.gca().add_artist(centre_circle)
+        ax.set_title("Secteur institutionnel")
+        plt.tight_layout()
+        st.pyplot(fig)
+        
+    with ca2:
+        st.subheader("Secteur")
+
+# =====================
+# Tableau des données filtrées
+# =====================
+
+
+st.subheader("📋 Données filtrées")
+st.dataframe(data, use_container_width=True)
+
+st.markdown("✅ Ce tableau de bord peut être enrichi avec d’autres bases (NSIA, BHCI, RGPH2021) pour élargir la vision et construire un **proxy de scoring locatif**.")
