@@ -197,6 +197,9 @@ tab1, tab2, tab3 = st.tabs(["Vue générale de la population", "KPIs locatifs & 
 
 # --------------------------- 1ere page ---------------------
 with tab1:
+
+    # Vue globale de la population
+    
     c1, c2= st.columns(2)
     with c1:
         # Pyramide des âges
@@ -226,24 +229,159 @@ with tab1:
 
     ca1, ca2 = st.columns(2)
     with ca1:
-        # Secteur institutionnel
-        #st.subheader("Secteur institutionnel")
-        #fig, ax = plt.subplots()
-        #data.groupby('branch')["region"].count().plot.pie(
-        #    autopct='%1.1f%%', ax=ax, colors=["green","orange","gray","blue","red","grey","purple","skyblue","yellow"])
-        #ax.set_ylabel("")
-        #st.pyplot(fig)
-        counts = data.groupby('branch')["region"].count()
-        fig, ax = plt.subplots(figsize=(20, 20))
-        ax.pie(counts, labels=counts.index, autopct='%1.1f%%', startangle=90, pctdistance=0.85)
-        centre_circle = plt.Circle((0, 0), 0.70, fc='white')  # cercle blanc au centre
-        fig.gca().add_artist(centre_circle)
-        ax.set_title("Secteur institutionnel")
+        #Catégorie socioprofessionnelle
+        
+        st.subheader(":green[**Catégorie socioprofessionnelle**]")
+        st.divider()
+        csp_counts = data['csp'].value_counts()
+        palette = sns.color_palette("tab20", len(csp_counts))
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        bars = ax.bar(csp_counts.index, csp_counts.values, color=palette)
+        
+        # Annoter chaque barre avec son effectif
+        for bar, value in zip(bars, csp_counts.values):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height(),
+                f'{value:,}',  # format séparateur milliers
+                ha='center', va='bottom',
+                fontsize=12, fontweight='bold'
+            )
+        
+        ax.set_ylabel("Effectif", fontsize=15)
+        ax.set_xlabel("")
+        plt.xticks(rotation=45, ha='right', fontsize=13)
+        sns.despine()
         plt.tight_layout()
+        
         st.pyplot(fig)
         
     with ca2:
-        st.subheader("Secteur")
+        # Secteur institutionnel
+        
+        st.subheader(":green[**Secteur institutionnel**]")
+        st.divider()
+        branch_counts = data['branch'].value_counts()
+        palette = sns.color_palette("tab20", len(branch_counts))
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        bars = ax.bar(branch_counts.index, branch_counts.values, color=palette)
+        
+        # Annoter chaque barre avec son effectif
+        for bar, value in zip(bars, branch_counts.values):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height(),
+                f'{value:,}',  # format séparateur milliers
+                ha='center', va='bottom',
+                fontsize=12, fontweight='bold'
+            )
+        
+        ax.set_ylabel("Effectif", fontsize=15)
+        ax.set_xlabel("")
+        plt.xticks(rotation=45, ha='right', fontsize=13)
+        sns.despine()
+        plt.tight_layout()
+        
+        st.pyplot(fig)
+        
+# --------------------------- 2ere page ---------------------
+
+with tab2:
+    
+    # KPIs locatifs & financiers
+
+    # Répartition par région et indicateurs clés
+    st.subheader(":green[**📈 Répartition régionale**]")
+    st.divider()
+    
+    st.dataframe(tab_region)
+    
+    c1, c2 = st.columns(2)
+    with c1:
+        # Revenu moyen par tranche d’âge
+        st.subheader(":green[**Revenu moyen par tranche d’âge**]")
+        st.divider()
+
+        # Revenu moyen par tranche d’âge
+        fig, ax = plt.subplots()
+        data.groupby("age_grp")["rev_total_mois"].mean().plot(kind="bar", ax=ax, color="skyblue")
+        ax.set_ylabel("Revenu moyen (FCFA)")
+
+        st.pyplot(fig)
+
+    with c2:
+        
+        st.subheader(":green[**📈 Répartition Taux bancarisation**]")
+        st.divider()
+        
+        fig, ax = plt.subplots()
+        data.groupby("age_grp")["bancarise"].mean().plot(kind="bar", ax=ax, color=["red", "orange","blue","green","grey", "purple", "skyblue"])
+        ax.set_ylabel("Taux de bancarisation (%)")
+        st.pyplot(fig) 
+    
+    # --------------------------------------------------------------------------------
+
+    ca1, ca2 = st.columns(2)
+    
+    with ca1:
+        
+        st.subheader(":green[**💼 Assurance et emploi formel**]")
+        st.divider()
+        
+        fig, ax = plt.subplots()
+        data[["empl_formel","a_assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
+        ax.set_ylabel("Proportion (%)")
+        st.pyplot(fig)
+
+    with ca2: 
+        # Statuts logement moyens nationaux
+        st.subheader(":green[**🏠 Répartition statuts logement**]")
+        st.divider()
+        
+        # Compter les effectifs par modalité de la variable 'logem'
+        statuts_logement = data['logem'].value_counts(dropna=False)
+        labels = statuts_logement.index  # ou map les int en labels si besoin
+        
+        colors = ["green","orange","blue","grey"]  # Personnalise ici
+        
+        fig, ax = plt.subplots(figsize=(7, 5))
+        wedges, texts, autotexts = ax.pie(
+            statuts_logement,
+            labels=labels,
+            autopct='%1.1f%%',
+            startangle=90,
+            colors=colors[:len(statuts_logement)],
+            textprops={'fontsize': 12}
+        )
+        ax.set_ylabel("")
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+
+
+    # --------------------------------------------------------
+    
+# --------------------------- 3e page ---------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # =====================
 # Tableau des données filtrées
