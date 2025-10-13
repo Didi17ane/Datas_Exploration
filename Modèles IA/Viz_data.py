@@ -365,8 +365,18 @@ with tab2:
     
 # --------------------------- 3e page ---------------------
 
+with tab3:
 
+    # Exploration Score
 
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.subheader("Score moyen")
+    with col2:
+        st.subheader("% Profils sécurisé")
+    with col3:
+        st.subheader("% Profils très à risque")
 
 
 
