@@ -20,6 +20,9 @@ from streamlit_folium import st_folium
 
 import pydeck as pdk
 
+import joblib
+from sklearn.metrics import precision_score, recall_score, r2_score, mean_squared_error
+from sklearn.preprocessing import LabelEncoder
 # ___________________________________________
 
 #### Page Configuration ####
@@ -369,10 +372,41 @@ with tab3:
 
     # Exploration Score
 
+    # Data Prediction
+    def prediction(data):
+
+        label_encoders = {}
+        # Variables catégorielles à encoder
+        cat_cols = ['mstat', 'age_grp', 'logem']
+        
+        for col in cat_cols:
+            le = LabelEncoder()
+            data_ml[col] = le.fit_transform(data_ml[col])
+            label_encoders[col] = le
+        print(data_ml)
+        y_pred = model.predict(data_ml)
+        print(f"y_prediction : {y_pred}")
+
+        return y_pred
+    
+    # Load Model
+    model = joblib.load('best_xgb.joblib')
+    data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num'], axis=1)   
+    X_val = data_ml.tail(1)
+    
+    # Prédiction
+    Profil_Score = prediction(X_val)
+        
+    print(f"Score de Solvabilité : {Profil_Score}")
+
+    data_ml["Profil_Score"] = Profil_Score
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.subheader("Score moyen")
+        st.markdown(f"{round(data_ml["Profil_Score"].mean(), 1)}")
+        print(f"New Dataset :\n{data_ml}")
     with col2:
         st.subheader("% Profils sécurisé")
     with col3:
