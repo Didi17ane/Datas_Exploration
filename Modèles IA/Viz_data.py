@@ -405,14 +405,37 @@ with tab3:
     
     with col1:
         st.subheader("Score moyen")
-        st.markdown(f"{round(data_ml["Profil_Score"].mean(), 1)}")
+        st.metric("", f"{round(data_ml["Profil_Score"].mean(), 1)}")
         print(f"New Dataset :\n{data_ml}")
     with col2:
         st.subheader("% Profils sécurisé")
+        data_Secure = data_ml[data_ml["Profil_Score"] >= 76]
+        secure = (data_Secure.shape[0] / data_ml.shape[0]) * 100
+        print(f"Securité : {secure}")
+        
+        st.metric("", f"{secure:,.2f} %")
+        
     with col3:
         st.subheader("% Profils très à risque")
 
+        data_Risque = data_ml[data_ml["Profil_Score"] <= 50]
+        risque = (data_Risque.shape[0] / data_ml.shape[0]) * 100
+        print(f"Risque : {risque}")
+        
+        st.metric("", f"{risque:,.2f} %")
 
+    c1, c2= st.columns(2)
+    with c1:
+        # Types de profil
+        st.subheader(":green[**Types de Profil**]")
+        st.divider()
+        
+        
+    with c2:
+        # Score Viz
+        st.subheader(":green[**Score Viz**]")
+        st.divider()
+        
 
 
 
