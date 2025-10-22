@@ -133,6 +133,8 @@ else:
         age_grp = st.sidebar.selectbox("Tranche d’âge", ["Toutes"] + sorted(df_ehcvm["age_grp"].unique().tolist()))
         sexe = st.sidebar.selectbox("Sexe", ["Tous"] + sorted(df_ehcvm["sexe"].unique().tolist()))
         mstat = st.sidebar.selectbox("Statut matrimonial", ["Tous"] + sorted(df_ehcvm["mstat"].unique().tolist()))
+        logem_filter = st.sidebar.selectbox("Statut logement", ["Tous"] + sorted(df_ehcvm["logem"].unique().tolist()))
+
         
         data = df_ehcvm.copy()
         # if "Toutes" not in region:
@@ -145,6 +147,8 @@ else:
             data = data[data["sexe"] == sexe]
         if mstat != "Tous":
             data = data[data["mstat"] == mstat]
+        if logem_filter != "Tous":
+            data = data[data["logem"] == logem_filter]
         
         
         # Advanced options
@@ -273,38 +277,20 @@ else:
     
         ca1, ca2 = st.columns(2)
         with ca1:
-            #Catégorie socioprofessionnelle
-            
-            st.subheader(":green[**Catégorie socioprofessionnelle**]")
-            st.divider()
-            csp_counts = data['csp'].value_counts()
-            palette = sns.color_palette("tab20", len(csp_counts))
-            
-            fig, ax = plt.subplots(figsize=(12, 6))
-            bars = ax.bar(csp_counts.index, csp_counts.values, color=palette)
-            
-            # Annoter chaque barre avec son effectif
-            for bar, value in zip(bars, csp_counts.values):
-                ax.text(
-                    bar.get_x() + bar.get_width() / 2,
-                    bar.get_height(),
-                    f'{value:,}',  # format séparateur milliers
-                    ha='center', va='bottom',
-                    fontsize=12, fontweight='bold'
-                )
-            
-            ax.set_ylabel("Effectif", fontsize=15)
-            ax.set_xlabel("")
-            plt.xticks(rotation=45, ha='right', fontsize=13)
-            sns.despine()
-            plt.tight_layout()
-            
-            st.pyplot(fig)
-            
-        with ca2:
-            # Secteur institutionnel
+
+            # Calcul du revenu moyen par catégorie branch
+            branch_rev = data.groupby("branch")["rev_total_mois"].mean().reset_index()
             
             st.subheader(":green[**Secteur institutionnel**]")
+            st.divider()
+            fig_branch = px.bar(branch_rev, x="branch", y="rev_total_mois",
+                                labels={"branch": "Branche", "rev_total_mois": "Revenu moyen (FCFA)"},
+                                title="Revenu moyen par branche")
+            st.plotly_chart(fig_branch, use_container_width=True)
+
+
+            # Secteur institutionnel
+            st.subheader(":gray[**Effectifs**]")
             st.divider()
             branch_counts = data['branch'].value_counts()
             palette = sns.color_palette("tab20", len(branch_counts))
@@ -330,18 +316,76 @@ else:
             
             st.pyplot(fig)
             
+        with ca2:
+           
+            # Calcul du revenu moyen par catégorie csp
+            csp_rev = data.groupby("csp")["rev_total_mois"].mean().reset_index()
+            st.subheader(":green[**Catégorie socioprofessionnelle (CSP)**]")
+            st.divider()
+            fig_csp = px.bar(csp_rev, x="csp", y="rev_total_mois",
+                             labels={"csp": "Catégorie socioprofessionnelle", "rev_total_mois": "Revenu moyen (FCFA)"},
+                             title="Revenu moyen par CSP")
+            st.plotly_chart(fig_csp, use_container_width=True)
+
+            #Catégorie socioprofessionnelle
+            
+            st.subheader(":gray[**Effectifs**]")
+            st.divider()
+            csp_counts = data['csp'].value_counts()
+            palette = sns.color_palette("tab20", len(csp_counts))
+            
+            fig, ax = plt.subplots(figsize=(12, 6))
+            bars = ax.bar(csp_counts.index, csp_counts.values, color=palette)
+            
+            # Annoter chaque barre avec son effectif
+            for bar, value in zip(bars, csp_counts.values):
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_height(),
+                    f'{value:,}',  # format séparateur milliers
+                    ha='center', va='bottom',
+                    fontsize=12, fontweight='bold'
+                )
+            
+            ax.set_ylabel("Effectif", fontsize=15)
+            ax.set_xlabel("")
+            plt.xticks(rotation=45, ha='right', fontsize=13)
+            sns.despine()
+            plt.tight_layout()
+            
+            st.pyplot(fig)
+             
+            
     # --------------------------- 2ere page ---------------------
     
     with tab2:
         
         # KPIs locatifs & financiers
-    
-        # Répartition par région et indicateurs clés
-        st.subheader(":green[**📈 Répartition régionale**]")
-        st.divider()
-        
-        st.dataframe(tab_region)
-        
+
+        c_1, c_2 = st.columns(2)
+
+        with c_1:
+            # Répartition par région et indicateurs clés
+            st.subheader(":green[**📈 Répartition régionale**]")
+            st.divider()
+            
+            st.dataframe(tab_region)
+        with c_2:
+            # Visualisation du revenu moyen par statut marital et tranche d'âge
+            st.subheader(":green[**Revenu moyen par tranche d'âge et statut matrimonial**]")
+            st.divider()
+            
+            rev_grouped = data.groupby(["age_grp", "mstat"])["rev_total_mois"].mean().reset_index()
+            
+            chart = alt.Chart(rev_grouped).mark_bar().encode(
+                x=alt.X('age_grp:N', title='Tranche d\'âge'),
+                y=alt.Y('rev_total_mois:Q', title='Revenu moyen (FCFA)'),
+                color='mstat:N',
+                tooltip=['age_grp', 'mstat', alt.Tooltip('rev_total_mois', format=',.2f')]
+            ).properties(title="Revenu moyen par tranche d'âge et statut matrimonial", width=700)
+            
+            st.altair_chart(chart)
+            
         c1, c2 = st.columns(2)
         with c1:
             # Revenu moyen par tranche d’âge
