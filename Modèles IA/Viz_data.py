@@ -280,7 +280,8 @@ else:
 
             # Calcul du revenu moyen par catégorie branch
             branch_rev = data.groupby("branch")["rev_total_mois"].mean().reset_index()
-            
+            branch_rev['rev_total_mois'] = branch_rev['rev_total_mois'].round(0)
+            print(f"branch_rev : {branch_rev}")
             st.subheader(":green[**Secteur institutionnel**]")
             st.divider()
             fig_branch = px.bar(branch_rev, x="branch", y="rev_total_mois",
@@ -320,6 +321,8 @@ else:
            
             # Calcul du revenu moyen par catégorie csp
             csp_rev = data.groupby("csp")["rev_total_mois"].mean().reset_index()
+            csp_rev['rev_total_mois'] = csp_rev['rev_total_mois'].round(0)
+            
             st.subheader(":green[**Catégorie socioprofessionnelle (CSP)**]")
             st.divider()
             fig_csp = px.bar(csp_rev, x="csp", y="rev_total_mois",
@@ -379,7 +382,7 @@ else:
     rev_moy=('rev_total_mois', 'mean'),
     banc_moy=('bancarise', 'mean')
 ).reset_index()
-            
+            rev_grouped['rev_moy'] = rev_grouped['rev_moy'].round(0)
             # Graphique des revenus moyens en barres
             bars = alt.Chart(rev_grouped).mark_bar().encode(
                 x=alt.X('age_grp:N', title="Tranche d'âge"),
