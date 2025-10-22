@@ -375,16 +375,36 @@ else:
             st.subheader(":green[**Revenu moyen par tranche d'âge et statut matrimonial**]")
             st.divider()
             
-            rev_grouped = data.groupby(["age_grp", "mstat"])["rev_total_mois"].mean().reset_index()
+            rev_grouped = data.groupby(["age_grp", "mstat"]).agg(
+    rev_moy=('rev_total_mois', 'mean'),
+    banc_moy=('bancarise', 'mean')
+).reset_index()
             
-            chart = alt.Chart(rev_grouped).mark_bar().encode(
-                x=alt.X('age_grp:N', title='Tranche d\'âge'),
-                y=alt.Y('rev_total_mois:Q', title='Revenu moyen (FCFA)'),
+            # Graphique des revenus moyens en barres
+            bars = alt.Chart(rev_grouped).mark_bar().encode(
+                x=alt.X('age_grp:N', title="Tranche d'âge"),
+                y=alt.Y('rev_moy:Q', title='Revenu moyen (FCFA)'),
                 color='mstat:N',
-                tooltip=['age_grp', 'mstat', alt.Tooltip('rev_total_mois', format=',.2f')]
-            ).properties(title="Revenu moyen par tranche d'âge et statut matrimonial", width=700)
+                tooltip=['age_grp', 'mstat', alt.Tooltip('rev_moy', format=',.2f')]
+            )
             
-            st.altair_chart(chart)
+            # Graphique en ligne du taux de bancarisation (%)
+            line = alt.Chart(rev_grouped).mark_line(point=True).encode(
+                x='age_grp:N',
+                y=alt.Y('banc_moy:Q', axis=alt.Axis(title='Taux de bancarisation', format='%')),
+                color='mstat:N',
+                tooltip=[alt.Tooltip('banc_moy', format='.0%')]
+            )
+            
+            # Combinaison avec axes secondaires
+            combined = alt.layer(bars, line).resolve_scale(
+                y='independent'  
+            ).properties(
+                title="Revenu moyen et taux de bancarisation par tranche d'âge et statut matrimonial",
+                width=700
+            )
+            
+            st.altair_chart(combined, use_container_width=True)
             
         c1, c2 = st.columns(2)
         with c1:
