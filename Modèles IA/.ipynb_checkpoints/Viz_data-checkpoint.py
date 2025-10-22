@@ -148,10 +148,10 @@ else:
         
         
         # Advanced options
-        st.subheader("Advanced Options")
-        show_targets = st.checkbox("Show Targets", value=True)
-        show_forecasts = st.checkbox("Show Forecasts", value=False)
-    
+        st.sidebar.subheader("📏 Tranche de Revenu")
+        min_revenu, max_revenu = st.sidebar.slider("Choisissez la plage", 0, 3000000, (0, 3000000))
+        data = data[data["rev_total_mois"].between(min_revenu, max_revenu)]  
+        
         # Bouton de déconnexion
         if st.button("Se déconnecter"):
             st.session_state.logged_in = False
@@ -412,18 +412,48 @@ else:
     with tab3:
     
         # Exploration Score
-    
+        
+        def Labelling(dat):
+            # Dictionnaires de mappage
+            map_mstat = {
+                "Célibataire": 0,
+                "Divorcé(e)": 1,
+                "Marié(e)": 2,
+                "Séparé": 3,
+                "Union libre": 4,
+                "Veuf(ve)": 5,
+            }
+        
+            map_age_grp = {
+                "0-17": 0,
+                "18-24": 1,
+                "25-34": 2,
+                "35-44": 3,
+                "45-54": 4,
+                "55-64": 5,
+                "65+": 6,
+            }
+        
+            map_logem = {
+                "Autre": 0,
+                "Locataire": 1,
+                "Proprietaire sans titre": 2,
+                "Proprietaire titre": 3,
+            }
+        
+            # Appliquer les mappings sur les colonnes concernées
+            dat["mstat"] = dat["mstat"].replace(map_mstat)
+            dat["age_grp"] = dat["age_grp"].replace(map_age_grp)
+            dat["logem"] = dat["logem"].replace(map_logem)
+
+            return dat
         # Data Prediction
         def prediction(dat_ml):
     
             label_encoders = {}
             # Variables catégorielles à encoder
-            cat_cols = ['mstat', 'age_grp', 'logem']
+            Labelling(dat_ml)
             
-            for col in cat_cols:
-                le = LabelEncoder()
-                dat_ml[col] = le.fit_transform(dat_ml[col])
-                label_encoders[col] = le
             print(dat_ml)
             y_pred = model.predict(dat_ml)
             print(f"y_prediction : {y_pred}")
@@ -431,7 +461,7 @@ else:
             return y_pred
         
         # Load Model
-        model = joblib.load('GradientBoostingRegressor.pkl')
+        model = joblib.load('GradientBoosting.pkl')
         data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num'], axis=1)   
         X_val = data_ml
         print(f"X_val : {X_val}")
@@ -522,18 +552,21 @@ else:
                 
                 
                 Mon_score = prediction(data_scoring)
+               
                 print(f"Mon Score : {Mon_score}")
                 st.success(f"Votre score est de : {Mon_score[0]:,.2f}")
 
-                if (Mon_score >= 0) and (Mon_score < 20):
+                Score = float(np.round(Mon_score.item(), 0))
+                print(f"Score : {Score}")
+                if 0 <= Score <= 20:
                     Mon_Profil = "Profil très vulnérable"
-                elif (Mon_score >= 21) and (Mon_score < 50):
+                elif (Score >= 21) and (Mon_score < 50):
                     Mon_Profil = "Profil vulnérable"
-                elif (Mon_score >= 51) and (Mon_score < 75):
+                elif (Score >= 51) and (Mon_score < 75):
                     Mon_Profil = " Profil intermédiaire"
-                elif (Mon_score >= 76) and (Mon_score < 90):
+                elif (Score >= 76) and (Mon_score < 90):
                     Mon_Profil = " Profil sécurisé"
-                elif (Mon_score > 90):
+                elif (Score > 90):
                     Mon_Profil = " Profil très sécurisé"
                     
                 st.success(f"Vous faites partir de la catégorie : {Mon_Profil}")
