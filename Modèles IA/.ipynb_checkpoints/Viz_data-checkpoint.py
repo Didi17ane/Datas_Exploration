@@ -253,6 +253,19 @@ else:
     
         # Vue globale de la population
         
+        st.subheader(f"Analyse descriptive pour le groupe : {emploi_type}")
+        a1, a2, a3= st.columns(3)
+        with a1:
+            st.write("**Effectifs par situation matrimoniale :**")
+            st.write(data['mstat'].value_counts())
+        with a2:
+            st.write("**Effectifs par statut de logement :**")
+            st.write(data['logem'].value_counts())
+        with a3:
+            st.write("**Taux d'assurance :**")
+            st.write(data['a_assurance'].mean())
+
+        
         c1, c2= st.columns(2)
         with c1:
             # Pyramide des âges
