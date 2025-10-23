@@ -555,7 +555,7 @@ else:
             return y_pred
         
         # Load Model
-        model = joblib.load('./Modèles\IA/GradientBoosting.pkl')
+        model = joblib.load('./Modèles IA/GradientBoosting.pkl')
         data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
         X_val = data_ml
         print(f"X_val : {X_val}")
