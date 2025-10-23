@@ -275,14 +275,14 @@ else:
         age_grp = data.groupby("age_grp").agg(population=("region", "size"), revenu_moy=("rev_total_mois","mean")).reset_index()
         st.dataframe(age_grp)
     
-        ca1, ca2 = st.columns(2)
+        ca1, ca2, ca3 = st.columns(3)
         with ca1:
 
             # Calcul du revenu moyen par catégorie branch
             branch_rev = data.groupby("branch")["rev_total_mois"].mean().reset_index()
             branch_rev['rev_total_mois'] = branch_rev['rev_total_mois'].round(0)
             print(f"branch_rev : {branch_rev}")
-            st.subheader(":green[**Secteur institutionnel**]")
+            st.subheader(":green[**Branche d'activité**]")
             st.divider()
             fig_branch = px.bar(branch_rev, x="branch", y="rev_total_mois",
                                 labels={"branch": "Branche", "rev_total_mois": "Revenu moyen (FCFA)"},
@@ -331,7 +331,6 @@ else:
             st.plotly_chart(fig_csp, use_container_width=True)
 
             #Catégorie socioprofessionnelle
-            
             st.subheader(":gray[**Effectifs**]")
             st.divider()
             csp_counts = data['csp'].value_counts()
@@ -357,7 +356,19 @@ else:
             plt.tight_layout()
             
             st.pyplot(fig)
-             
+
+        with ca3:
+             # Calcul du revenu moyen par secteur
+            sectins_rev = data.groupby("sectins")["rev_total_mois"].mean().reset_index()
+            sectins_rev['rev_total_mois'] = sectins_rev['rev_total_mois'].round(0)
+            print(f"sectins_rev : {sectins_rev}")
+            st.subheader(":green[**Secteur institutionnel**]")
+            st.divider()
+            fig_sectin = px.bar(sectins_rev, x="sectins", y="rev_total_mois",
+                                labels={"sectins": "Secteur", "rev_total_mois": "Revenu moyen (FCFA)"},
+                                title="Revenu moyen par Secteur institutionnel")
+            st.plotly_chart(fig_sectin, use_container_width=True)
+
             
     # --------------------------- 2ere page ---------------------
     
