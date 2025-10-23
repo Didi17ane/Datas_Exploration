@@ -125,6 +125,9 @@ else:
             options=["EHCVM2021", ""],
             default=["EHCVM2021"]
         )
+
+        # Label textuel pour affichage
+        df_ehcvm["emploi_cat"] = df_ehcvm["empl_formel"].map({0: "Informel", 1: "Formel"})
         
         # Filters
         st.subheader("Filters")
@@ -134,8 +137,8 @@ else:
         sexe = st.sidebar.selectbox("Sexe", ["Tous"] + sorted(df_ehcvm["sexe"].unique().tolist()))
         mstat = st.sidebar.selectbox("Statut matrimonial", ["Tous"] + sorted(df_ehcvm["mstat"].unique().tolist()))
         logem_filter = st.sidebar.selectbox("Statut logement", ["Tous"] + sorted(df_ehcvm["logem"].unique().tolist()))
+        emploi_type = st.selectbox("Filtrer par type d'emploi",options=["Tous", "Formel", "Informel"])
 
-        
         data = df_ehcvm.copy()
         # if "Toutes" not in region:
         #    data = data[data["region"].isin(region)]
@@ -149,7 +152,9 @@ else:
             data = data[data["mstat"] == mstat]
         if logem_filter != "Tous":
             data = data[data["logem"] == logem_filter]
-        
+        if emploi_type != "Tous":
+            data = data[data["emploi_cat"] == emploi_type]
+
         
         # Advanced options
         st.sidebar.subheader("📏 Tranche de Revenu")
@@ -540,7 +545,7 @@ else:
         
         # Load Model
         model = joblib.load('GradientBoosting.pkl')
-        data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num'], axis=1)   
+        data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
         X_val = data_ml
         print(f"X_val : {X_val}")
         
