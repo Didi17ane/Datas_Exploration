@@ -14,3 +14,10 @@ streamlit_navigation_bar
 pydeck
 folium
 streamlit_folium
+
+joblib
+precision_score
+recall_score
+r2_score
+mean_squared_error
+LabelEncoder
