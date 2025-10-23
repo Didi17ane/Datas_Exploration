@@ -21,8 +21,6 @@ from streamlit_folium import st_folium
 import pydeck as pdk
 
 import joblib
-from sklearn.metrics import precision_score, recall_score, r2_score, mean_squared_error
-from sklearn.preprocessing import LabelEncoder
 # ___________________________________________
 
 #### Page Configuration ####
