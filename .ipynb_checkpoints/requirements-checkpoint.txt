@@ -14,5 +14,7 @@ streamlit_navigation_bar
 pydeck
 folium
 streamlit_folium
-
 joblib
+scikit-learn
+warnings
+xgboost

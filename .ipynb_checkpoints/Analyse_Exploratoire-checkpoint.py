@@ -21,6 +21,16 @@ from streamlit_folium import st_folium
 import pydeck as pdk
 
 import joblib
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score, r2_score, mean_squared_error, confusion_matrix, classification_report, ConfusionMatrixDisplay
+from sklearn.model_selection import GridSearchCV 
+import xgboost as xgb
+from xgboost import XGBRegressor
+import warnings
+from sklearn.ensemble import GradientBoostingRegressor
+warnings.filterwarnings('ignore')
+
+
 # ___________________________________________
 
 #### Page Configuration ####
@@ -506,7 +516,7 @@ else:
     with tab3:
     
         # Exploration Score
-        
+        st.subheader("📋 SCORING")
         def Labelling(dat):
             # Dictionnaires de mappage
             map_mstat = {
@@ -555,7 +565,7 @@ else:
             return y_pred
         
         # Load Model
-        model = joblib.load('GradientBoosting.pkl')
+        model = joblib.load('./Modèles IA/GradientBoosting.pkl')
         data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
         X_val = data_ml
         print(f"X_val : {X_val}")

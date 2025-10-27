@@ -21,6 +21,16 @@ from streamlit_folium import st_folium
 import pydeck as pdk
 
 import joblib
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score, r2_score, mean_squared_error, confusion_matrix, classification_report, ConfusionMatrixDisplay
+from sklearn.model_selection import GridSearchCV 
+import xgboost as xgb
+from xgboost import XGBRegressor
+import warnings
+from sklearn.ensemble import GradientBoostingRegressor
+warnings.filterwarnings('ignore')
+
+
 # ___________________________________________
 
 #### Page Configuration ####
@@ -555,52 +565,52 @@ else:
             return y_pred
         
         # Load Model
-        #model = joblib.load('./Modèles IA/GradientBoosting.pkl')
-       # data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
-     #   X_val = data_ml
-     #   print(f"X_val : {X_val}")
+        model = joblib.load('./Modèles IA/GradientBoosting.pkl')
+        data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
+        X_val = data_ml
+        print(f"X_val : {X_val}")
         
         # Prédiction
-    #    Profil_Score = prediction(X_val)
+        Profil_Score = prediction(X_val)
             
-     #   print(f"Score de Solvabilité : {Profil_Score}")
+        print(f"Score de Solvabilité : {Profil_Score}")
     
-      #  data_ml["Profil_Score"] = Profil_Score
+        data_ml["Profil_Score"] = Profil_Score
         
-     #   col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
         
-     #   with col1:
-    #        st.subheader("Score moyen")
-      #      st.metric("", f"{round(data_ml["Profil_Score"].mean(), 1)}")
-      #      print(f"New Dataset :\n{data_ml}")
-     #   with col2:
-      #      st.subheader("% Profils sécurisé")
-        #    data_Secure = data_ml[data_ml["Profil_Score"] >= 76]
-      #      secure = (data_Secure.shape[0] / data_ml.shape[0]) * 100
-      #      print(f"Securité : {secure}")
+        with col1:
+            st.subheader("Score moyen")
+            st.metric("", f"{round(data_ml["Profil_Score"].mean(), 1)}")
+            print(f"New Dataset :\n{data_ml}")
+        with col2:
+            st.subheader("% Profils sécurisé")
+            data_Secure = data_ml[data_ml["Profil_Score"] >= 76]
+            secure = (data_Secure.shape[0] / data_ml.shape[0]) * 100
+            print(f"Securité : {secure}")
             
-     #       st.metric("", f"{secure:,.2f} %")
+            st.metric("", f"{secure:,.2f} %")
             
-    #    with col3:
-      #      st.subheader("% Profils très à risque")
+        with col3:
+            st.subheader("% Profils très à risque")
     
-       #     data_Risque = data_ml[data_ml["Profil_Score"] <= 50]
-         #   risque = (data_Risque.shape[0] / data_ml.shape[0]) * 100
-         #   print(f"Risque : {risque}")
+            data_Risque = data_ml[data_ml["Profil_Score"] <= 50]
+            risque = (data_Risque.shape[0] / data_ml.shape[0]) * 100
+            print(f"Risque : {risque}")
             
-        #    st.metric("", f"{risque:,.2f} %")
+            st.metric("", f"{risque:,.2f} %")
     
-      #  c1, c2= st.columns(2)
-     #   with c1:
+        c1, c2= st.columns(2)
+        with c1:
             # Types de profil
-        #    st.subheader(":green[**Types de Profil**]")
-        #    st.divider()
+            st.subheader(":green[**Types de Profil**]")
+            st.divider()
             
             
-    #    with c2:
+        with c2:
             # Score Viz
-    #        st.subheader(":green[**Score Viz**]")
-          #  st.divider()
+            st.subheader(":green[**Score Viz**]")
+            st.divider()
             def scoring():
                 placeholder = st.empty()
                 cols = st.columns([1, 3, 1])
@@ -618,52 +628,52 @@ else:
             
                 return situation, revenu, gr_age, emploi_form, bank, assure, statut_log, score_submitted, placeholder
 
-          #  situation, revenu, gr_age, emploi_form, bank, assure, statut_log, score_submitted, placeholder = scoring()
+            situation, revenu, gr_age, emploi_form, bank, assure, statut_log, score_submitted, placeholder = scoring()
 
-        #    if score_submitted:
-          #      if emploi_form == "Oui":
-              #      emploi_form = 1
-             #   else:
-              #      emploi_form = 0
+            if score_submitted:
+                if emploi_form == "Oui":
+                    emploi_form = 1
+                else:
+                    emploi_form = 0
 
-             #   if bank == "Oui":
-              #      bank = 1
-            #    else:
-              #      bank = 0
+                if bank == "Oui":
+                    bank = 1
+                else:
+                    bank = 0
 
-              #  if assure == "Oui":
-               #     assure = 1
-             #   else:
-              #      assure = 0
+                if assure == "Oui":
+                    assure = 1
+                else:
+                    assure = 0
 
-               # if not revenu:
-               #     revenu = 0
+                if not revenu:
+                    revenu = 0
                 
-              #  data_scoring = pd.DataFrame([
-             #       {'mstat':situation, 'rev_total_mois':revenu, 'age_grp':gr_age, 'empl_formel':emploi_form, 'bancarise':bank, 'a_assurance':assure, 'logem':statut_log}
-              #  ])
-             #   print(f"data Scoring : {data_scoring}")
+                data_scoring = pd.DataFrame([
+                    {'mstat':situation, 'rev_total_mois':revenu, 'age_grp':gr_age, 'empl_formel':emploi_form, 'bancarise':bank, 'a_assurance':assure, 'logem':statut_log}
+                ])
+                print(f"data Scoring : {data_scoring}")
                 
                 
-            #    Mon_score = prediction(data_scoring)
+                Mon_score = prediction(data_scoring)
                
-              #  print(f"Mon Score : {Mon_score}")
-             #   st.success(f"Votre score est de : {Mon_score[0]:,.2f}")
+                print(f"Mon Score : {Mon_score}")
+                st.success(f"Votre score est de : {Mon_score[0]:,.2f}")
 
-            #    Score = float(np.round(Mon_score.item(), 0))
-           #     print(f"Score : {Score}")
-            #    if 0 <= Score <= 20:
-           #         Mon_Profil = "Profil très vulnérable"
-             #   elif (Score >= 21) and (Mon_score < 50):
-            #        Mon_Profil = "Profil vulnérable"
-            #    elif (Score >= 51) and (Mon_score < 75):
-              #      Mon_Profil = " Profil intermédiaire"
-             #   elif (Score >= 76) and (Mon_score < 90):
-             #       Mon_Profil = " Profil sécurisé"
-              #  elif (Score > 90):
-                #    Mon_Profil = " Profil très sécurisé"
+                Score = float(np.round(Mon_score.item(), 0))
+                print(f"Score : {Score}")
+                if 0 <= Score <= 20:
+                    Mon_Profil = "Profil très vulnérable"
+                elif (Score >= 21) and (Mon_score < 50):
+                    Mon_Profil = "Profil vulnérable"
+                elif (Score >= 51) and (Mon_score < 75):
+                    Mon_Profil = " Profil intermédiaire"
+                elif (Score >= 76) and (Mon_score < 90):
+                    Mon_Profil = " Profil sécurisé"
+                elif (Score > 90):
+                    Mon_Profil = " Profil très sécurisé"
                     
-               # st.success(f"Vous faites partir de la catégorie : {Mon_Profil}")
+                st.success(f"Vous faites partir de la catégorie : {Mon_Profil}")
 
     
     
