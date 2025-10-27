@@ -127,7 +127,7 @@ else:
         )
 
         # Label textuel pour affichage
-        df_ehcvm["emploi_cat"] = df_ehcvm["empl_formel"].map({0: "Informel", 1: "Formel"})
+        df_ehcvm["emploi_cat"] = df_ehcvm["Stg_formel"].map({0: "Informel", 1: "Formel"})
         
         # Filters
         st.subheader("Filters")
@@ -186,7 +186,7 @@ else:
             value=f"{population:,.0f} ",   
         )
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        empl = round(data['empl_formel'].mean()*100, 1)
+        empl = round(data['Stg_formel'].mean()*100, 1)
         if np.isnan(empl):
             empl=0
         st.metric("Emploi formel", f"{empl} %")
@@ -471,7 +471,7 @@ else:
             st.divider()
             
             fig, ax = plt.subplots()
-            data[["empl_formel","a_assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
+            data[["Stg_formel","a_assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
             ax.set_ylabel("Proportion (%)")
             st.pyplot(fig)
     
@@ -558,7 +558,7 @@ else:
         
         # Load Model
         model = joblib.load('GradientBoosting.pkl')
-        data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
+        data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat', 'Stg_formel'], axis=1)   
         X_val = data_ml
         print(f"X_val : {X_val}")
         
@@ -612,7 +612,7 @@ else:
                         situation = st.selectbox("Votre Statut matrimonial", sorted(df_ehcvm["mstat"].unique().tolist()))
                         revenu = st.text_input("Votre Revenu Mensuel")
                         gr_age = st.selectbox("Votre Tranche d’âge", sorted(df_ehcvm["age_grp"].unique().tolist()))
-                        emploi_form = st.selectbox("Votre Emploi Formel", ["Oui", "Non"])
+                        emploi_form = st.selectbox("Votre emploi Formel", ["Oui", "Non"])
                         bank = st.selectbox("Êtes-vous bancarisé?", ["Oui", "Non"])
                         assure = st.selectbox("Êtes-vous assuré?", ["Oui", "Non"])
                         statut_log = st.selectbox("Votre Statut de Logement", sorted(df_ehcvm["logem"].unique().tolist()))
@@ -642,7 +642,7 @@ else:
                     revenu = 0
                 
                 data_scoring = pd.DataFrame([
-                    {'mstat':situation, 'rev_total_mois':revenu, 'age_grp':gr_age, 'empl_formel':emploi_form, 'bancarise':bank, 'a_assurance':assure, 'logem':statut_log}
+                    {'mstat':situation, 'rev_total_mois':revenu, 'age_grp':gr_age, 'Stg_formel':emploi_form, 'bancarise':bank, 'a_assurance':assure, 'logem':statut_log}
                 ])
                 print(f"data Scoring : {data_scoring}")
                 
