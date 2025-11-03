@@ -562,12 +562,14 @@ else:
                 print("Modele Informel")
                 y_pred_informel = model_informel.predict(df_informel)
                 y_pred.loc[df_informel.index] = y_pred_informel
-            
+                #Proba = model_informel.predict_proba(df_informel)
+                
             if not df_formel.empty:
                 print("Modele Formel")
                 y_pred_formel = model_formel.predict(df_formel)
                 y_pred.loc[df_formel.index] = y_pred_formel
-            
+                #Proba = model_formel.predict_proba(df_formel)
+                
             print("Prédiction finale :")
             print(y_pred)
     
@@ -576,8 +578,8 @@ else:
 
         
         # Load Model
-        model_formel = joblib.load('Formel_model.pkl')
-        model_informel = joblib.load('Informel_model.pkl')
+        model_formel = joblib.load('../Production_Models/Best_Formel_model.pkl')
+        model_informel = joblib.load('../Production_Models/Best_Informel_model.pkl')
         data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
         X_val = data_ml
         print(f"X_val : {X_val}")
@@ -689,6 +691,8 @@ else:
                         Mon_Profil = " Profil très sécurisé"
                         
                     st.success(f"Vous faites partir de la catégorie : {Mon_Profil}")
+                    #st.success(f"Probabilité de prédiction : {Probabilte}")
+                    
                 
             
     
