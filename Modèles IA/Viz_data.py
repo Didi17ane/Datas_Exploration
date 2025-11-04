@@ -103,6 +103,7 @@ else:
     # ------------------------ Charger les données
     
     df = pd.read_csv("../DATAS/CleanALL_EHCVM.csv")
+    data_tylimmo = pd.read_csv("../DATAS/Clean_Tylimmo.csv")
     df_ehcvm = df.copy()
     
     print(f"Dataset de visualisation : {df_ehcvm}")
@@ -586,9 +587,15 @@ else:
         
         # Prédiction
         Profil_Score = prediction(X_val)
-            
-        print(f"Score de Solvabilité : {Profil_Score}")
-    
+
+        
+# -----------------------------------------------------------------------------------------------
+        score_tylimmo = prediction(data_tylimmo)
+        print(f"SCORE TYLIMMO :\n{score_tylimmo}")
+# -----------------------------------------------------------------------------------------------
+
+        print(f"Score de Solvabilité :\n {Profil_Score}")
+
         data_ml["Profil_Score"] = Profil_Score
         
         col1, col2, col3 = st.columns(3)
