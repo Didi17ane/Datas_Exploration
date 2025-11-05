@@ -21,16 +21,8 @@ from streamlit_folium import st_folium
 import pydeck as pdk
 
 import joblib
-
-from sklearn.metrics import accuracy_score, precision_score, recall_score, r2_score, mean_squared_error, confusion_matrix, classification_report, ConfusionMatrixDisplay
-from sklearn.model_selection import GridSearchCV 
-import xgboost as xgb
-from xgboost import XGBRegressor
-import warnings
-from sklearn.ensemble import GradientBoostingRegressor
-warnings.filterwarnings('ignore')
-
-
+from sklearn.metrics import precision_score, recall_score, r2_score, mean_squared_error
+from sklearn.preprocessing import LabelEncoder
 # ___________________________________________
 
 #### Page Configuration ####
@@ -111,6 +103,7 @@ else:
     # ------------------------ Charger les données
     
     df = pd.read_csv("./DATAS/CleanALL_EHCVM.csv")
+    data_tylimmo = pd.read_csv("./DATAS/Clean_Tylimmo.csv")
     df_ehcvm = df.copy()
     
     print(f"Dataset de visualisation : {df_ehcvm}")
@@ -135,7 +128,7 @@ else:
         )
 
         # Label textuel pour affichage
-        df_ehcvm["emploi_cat"] = df_ehcvm["empl_formel"].map({0: "Informel", 1: "Formel"})
+        df_ehcvm["emploi_cat"] = df_ehcvm["Stg_formel"].map({0: "Informel", 1: "Formel"})
         
         # Filters
         st.subheader("Filters")
@@ -194,7 +187,7 @@ else:
             value=f"{population:,.0f} ",   
         )
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        empl = round(data['empl_formel'].mean()*100, 1)
+        empl = round(data['Stg_formel'].mean()*100, 1)
         if np.isnan(empl):
             empl=0
         st.metric("Emploi formel", f"{empl} %")
@@ -479,7 +472,7 @@ else:
             st.divider()
             
             fig, ax = plt.subplots()
-            data[["empl_formel","a_assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
+            data[["Stg_formel","a_assurance"]].mean().plot(kind="bar", ax=ax, color=["purple","red"])
             ax.set_ylabel("Proportion (%)")
             st.pyplot(fig)
     
@@ -516,7 +509,7 @@ else:
     with tab3:
     
         # Exploration Score
-        st.subheader("📋 SCORING")
+        
         def Labelling(dat):
             # Dictionnaires de mappage
             map_mstat = {
@@ -551,63 +544,86 @@ else:
             dat["logem"] = dat["logem"].replace(map_logem)
 
             return dat
+
         # Data Prediction
         def prediction(dat_ml):
     
-            label_encoders = {}
             # Variables catégorielles à encoder
             Labelling(dat_ml)
             
-            print(dat_ml)
-            #y_pred = model.predict(dat_ml)
-            #print(f"y_prediction : {y_pred}")
+            df_informel = dat_ml[dat_ml['Stg_formel'] == 0]
+            df_formel = dat_ml[dat_ml['Stg_formel'] == 1]
+            
+            df_informel = df_informel.drop(['Stg_formel'], axis=1)   
+            df_formel = df_formel.drop(['Stg_formel'], axis=1)   
+        
+            y_pred = pd.Series(index=dat_ml.index, dtype=float)
+            
+            if not df_informel.empty:
+                print("Modele Informel")
+                y_pred_informel = model_informel.predict(df_informel)
+                y_pred.loc[df_informel.index] = y_pred_informel
+                #Proba = model_informel.predict_proba(df_informel)
+                
+            if not df_formel.empty:
+                print("Modele Formel")
+                y_pred_formel = model_formel.predict(df_formel)
+                y_pred.loc[df_formel.index] = y_pred_formel
+                #Proba = model_formel.predict_proba(df_formel)
+                
+            print("Prédiction finale :")
+            print(y_pred)
     
-            #return y_pred
+            
+            return y_pred
+
         
         # Load Model
-        #model = joblib.load('./Modèles IA/GradientBoosting.pkl')
-        #data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
-       # X_val = data_ml
-       # print(f"X_val : {X_val}")
+        model_formel = joblib.load('./Production_Models/Best_Formel_model.pkl')
+        model_informel = joblib.load('./Production_Models/Best_Informel_model.pkl')
+        data_ml = data.drop(['region', 'sexe', 'branch', 'sectins', 'csp', 'age_num', 'emploi_cat'], axis=1)   
+        X_val = data_ml
+        print(f"X_val : {X_val}")
         
         # Prédiction
-        #Profil_Score = prediction(X_val)
-            
-        #print(f"Score de Solvabilité : {Profil_Score}")
-    
-        #data_ml["Profil_Score"] = Profil_Score
+        Profil_Score = prediction(X_val)
+
+        
+# -----------------------------------------------------------------------------------------------
+        score_tylimmo = prediction(data_tylimmo)
+        print(f"SCORE TYLIMMO :\n{score_tylimmo}")
+# -----------------------------------------------------------------------------------------------
+
+        print(f"Score de Solvabilité :\n {Profil_Score}")
+
+        data_ml["Profil_Score"] = Profil_Score
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
             st.subheader("Score moyen")
-            #st.metric("", f"{round(data_ml["Profil_Score"].mean(), 1)}")
-            #print(f"New Dataset :\n{data_ml}")
+            st.metric("", f"{round(data_ml["Profil_Score"].mean(), 1)}")
+            print(f"New Dataset :\n{data_ml}")
         with col2:
             st.subheader("% Profils sécurisé")
-            #data_Secure = data_ml[data_ml["Profil_Score"] >= 76]
-            #secure = (data_Secure.shape[0] / data_ml.shape[0]) * 100
-           # print(f"Securité : {secure}")
+            data_Secure = data_ml[data_ml["Profil_Score"] >= 56]
+            secure = (data_Secure.shape[0] / data_ml.shape[0]) * 100
+            print(f"Securité : {secure}")
             
-            #st.metric("", f"{secure:,.2f} %")
+            st.metric("", f"{secure:,.2f} %")
             
         with col3:
             st.subheader("% Profils très à risque")
     
-            #data_Risque = data_ml[data_ml["Profil_Score"] <= 50]
-            #risque = (data_Risque.shape[0] / data_ml.shape[0]) * 100
-            #print(f"Risque : {risque}")
+            data_Risque = data_ml[data_ml["Profil_Score"] <= 31]
+            risque = (data_Risque.shape[0] / data_ml.shape[0]) * 100
+            print(f"Risque : {risque}")
             
-            #st.metric("", f"{risque:,.2f} %")
+            st.metric("", f"{risque:,.2f} %")
     
         c1, c2= st.columns(2)
+       
         with c1:
-            # Types de profil
-            st.subheader(":green[**Types de Profil**]")
-            st.divider()
-            
-            
-        with c2:
             # Score Viz
             st.subheader(":green[**Score Viz**]")
             st.divider()
@@ -620,7 +636,7 @@ else:
                         situation = st.selectbox("Votre Statut matrimonial", sorted(df_ehcvm["mstat"].unique().tolist()))
                         revenu = st.text_input("Votre Revenu Mensuel")
                         gr_age = st.selectbox("Votre Tranche d’âge", sorted(df_ehcvm["age_grp"].unique().tolist()))
-                        emploi_form = st.selectbox("Votre Emploi Formel", ["Oui", "Non"])
+                        emploi_form = st.selectbox("Votre emploi Formel", ["Oui", "Non"])
                         bank = st.selectbox("Êtes-vous bancarisé?", ["Oui", "Non"])
                         assure = st.selectbox("Êtes-vous assuré?", ["Oui", "Non"])
                         statut_log = st.selectbox("Votre Statut de Logement", sorted(df_ehcvm["logem"].unique().tolist()))
@@ -649,33 +665,43 @@ else:
                 if not revenu:
                     revenu = 0
                 
-                #data_scoring = pd.DataFrame([
-                 #   {'mstat':situation, 'rev_total_mois':revenu, 'age_grp':gr_age, 'empl_formel':emploi_form, 'bancarise':bank, 'a_assurance':assure, 'logem':statut_log}
-                #])
-                #print(f"data Scoring : {data_scoring}")
                 
-                
-                #Mon_score = prediction(data_scoring)
-               
-                #print(f"Mon Score : {Mon_score}")
-                #st.success(f"Votre score est de : {Mon_score[0]:,.2f}")
-
-                #Score = float(np.round(Mon_score.item(), 0))
-                #print(f"Score : {Score}")
-                #if 0 <= Score <= 20:
-                 #   Mon_Profil = "Profil très vulnérable"
-                #elif (Score >= 21) and (Mon_score < 50):
-                 #   Mon_Profil = "Profil vulnérable"
-                #elif (Score >= 51) and (Mon_score < 75):
-                 #   Mon_Profil = " Profil intermédiaire"
-                #elif (Score >= 76) and (Mon_score < 90):
-                 #   Mon_Profil = " Profil sécurisé"
-                #elif (Score > 90):
-                #    Mon_Profil = " Profil très sécurisé"
+        with c2:
+            # Types de profil
+            st.subheader(":green[**Vos résultats**]")
+            st.divider()
+            
+            data_scoring = pd.DataFrame([
+                    {'mstat':situation, 'rev_total_mois':revenu, 'age_grp':gr_age, 'Stg_formel':emploi_form, 'bancarise':bank, 'a_assurance':assure, 'logem':statut_log}
+                ])
+            
+            print(f"data Scoring : {data_scoring}")
+            if not data_scoring.empty:
+                Mon_score = prediction(data_scoring)
+                   
+                print(f"Mon Score : {Mon_score}")
+                if not Mon_score.empty:
                     
-               # st.success(f"Vous faites partir de la catégorie : {Mon_Profil}")
-
-    
+                    st.success(f"Votre score est de : {Mon_score[0]:,.2f}")
+        
+                    Score = float(np.round(Mon_score.item(), 0))
+                    print(f"Score : {Score}")
+                    if 0 <= Score <= 18:
+                        Mon_Profil = "Profil très vulnérable"
+                    elif 19 <= Score <= 30:
+                        Mon_Profil = "Profil vulnérable"
+                    elif 31 <= Score <= 55:
+                        Mon_Profil = " Profil intermédiaire"
+                    elif 56 <= Score <= 70:
+                        Mon_Profil = " Profil sécurisé"
+                    elif (Score > 70):
+                        Mon_Profil = " Profil très sécurisé"
+                        
+                    st.success(f"Vous faites partir de la catégorie : {Mon_Profil}")
+                    #st.success(f"Probabilité de prédiction : {Probabilte}")
+                    
+                
+            
     
     
     
