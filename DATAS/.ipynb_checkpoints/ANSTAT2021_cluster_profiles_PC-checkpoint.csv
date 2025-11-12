@@ -1,0 +1,11 @@
+cluster,taille,age_median,pct_bancarisés,milieu_mode,region_mode,statut_matrimonial_mode,sexe_mode
+0,10388,7.0,0.0,Rural,HAUT-SASSANDRA,Célibataire,Féminin
+1,5840,9.0,0.0,Urbain,TONKPI,Célibataire,Masculin
+2,4558,61.0,13.997367266344888,Rural,BELIER,Marié(e),Féminin
+3,3489,42.0,95.81541989108628,Urbain,AUTONOME D'ABIDJAN,Marié(e),Féminin
+4,6638,43.0,96.0831575775836,Rural,HAUT-SASSANDRA,Marié(e),Masculin
+5,11953,8.0,0.0,Rural,HAUT-SASSANDRA,Célibataire,Masculin
+6,8782,34.0,19.608289683443406,Rural,HAUT-SASSANDRA,Marié(e),Féminin
+7,5691,9.0,0.0,Urbain,GBEKE,Célibataire,Féminin
+8,2813,15.0,29.82580874511198,Urbain,AUTONOME D'ABIDJAN,Célibataire,Masculin
+9,4322,23.0,100.0,Urbain,YAMOUSSOUKRO,Célibataire,Masculin
