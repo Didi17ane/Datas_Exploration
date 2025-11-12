@@ -225,6 +225,21 @@ else:
         st.metric("% Hommes", f"{pour_hom} %")
         
     with col4:
+
+        # Revenus mensuels
+        data = data[data["rev_total_mois"] != 0]
+        revenus = data['rev_total_mois']
+        
+        # Calcul de la médiane
+        mediane = revenus.median()
+        
+        # Calcul des quantiles souhaités, par exemple 25%, 50%, 75%
+        quantiles = revenus.quantile([0.25, 0.5, 0.75])
+        
+        print("Médiane :", mediane)
+        print("Quantiles :\n", quantiles)
+
+        
         rev = round(data['rev_total_mois'].mean(), 0)
         if np.isnan(rev):
             rev=0    
@@ -298,6 +313,8 @@ else:
         with ca1:
 
             # Calcul du revenu moyen par catégorie branch
+                
+            
             branch_rev = data.groupby("branch")["rev_total_mois"].mean().reset_index()
             branch_rev['rev_total_mois'] = branch_rev['rev_total_mois'].round(0)
             print(f"branch_rev : {branch_rev}")
@@ -339,6 +356,7 @@ else:
         with ca2:
            
             # Calcul du revenu moyen par catégorie csp
+            
             csp_rev = data.groupby("csp")["rev_total_mois"].mean().reset_index()
             csp_rev['rev_total_mois'] = csp_rev['rev_total_mois'].round(0)
             
@@ -447,12 +465,38 @@ else:
     
             # Revenu moyen par tranche d’âge
             fig, ax = plt.subplots()
-            data.groupby("age_grp")["rev_total_mois"].mean().plot(kind="bar", ax=ax, color="skyblue")
+            data.groupby("age_grp")["rev_total_mois"].median().plot(kind="bar", ax=ax, color="skyblue")
+            data = data[data["rev_total_mois"] != 0]
             ax.set_ylabel("Revenu moyen (FCFA)")
     
             st.pyplot(fig)
     
         with c2:
+            
+            # _____________________________________________________________________________________
+
+            csp_rev = data.groupby("csp")["rev_total_mois"].median().reset_index()
+            csp_rev['rev_total_mois'] = csp_rev['rev_total_mois'].round(0)
+            
+            # _____________________________________________________________________________________
+            data = data[data["rev_total_mois"] != 0]
+            # _____________________________________________________________________________________
+            
+            st.subheader(":green[**Catégorie socioprofessionnelle (CSP)**]")
+            st.divider()
+            fig_csp = px.bar(csp_rev, x="csp", y="rev_total_mois",
+                             labels={"csp": "Catégorie socioprofessionnelle", "rev_total_mois": "Revenu median (FCFA)"},
+                             title="Revenu median par CSP")
+            st.plotly_chart(fig_csp, use_container_width=True)
+
+
+
+
+
+
+            # _____________________________________________________________________________________
+
+
             
             st.subheader(":green[**📈 Répartition Taux bancarisation**]")
             st.divider()
