@@ -1,3 +1,5 @@
+# **TEST POUR 100 CLUSTERS**
+
 
 import pandas as pd
 import numpy as np
@@ -16,10 +18,10 @@ from sklearn.decomposition import PCA
 # 1) Paramètres
 # ==========
 INPUT_CSV = "../DATAS/ANSTAT2021_dataset_Clean.csv"
-OUTPUT_CLUSTERS_CSV = "../DATAS/ANSTAT2021_clusters_PC.csv"
-OUTPUT_PROFILES_CSV = "../DATAS/ANSTAT2021_cluster_profiles_PC.csv"
+OUTPUT_CLUSTERS_CSV = "../DATAS/ANSTAT2021_clusters_100.csv"
+OUTPUT_PROFILES_CSV = "../DATAS/ANSTAT2021_cluster_profiles_100.csv"
 RANDOM_STATE = 42
-K_MIN, K_MAX = 2, 10   # plage testée pour k
+K_MIN, K_MAX = 2, 100   # plage testée pour k
 
 # ==========
 # 2) Chargement
@@ -42,7 +44,6 @@ cat_vars = [
     "sex",
     "marital_status",
     "city",
-    "milieu_resid",
     "region_name",
     "bancarise",
 ]
@@ -181,11 +182,13 @@ for c in sorted(df["cluster"].unique()):
     if "bancarise" in sub.columns:
         # bancarise peut être 0/1
         row["pct_bancarisés"] = pct_true(sub["bancarise"])
+    if "city" in sub.columns:
+        row["ville_mode"] = sub["city"].mode(dropna=True).iloc[0] if not sub["city"].mode(dropna=True).empty else np.nan  
+         
     # répartition milieu/region (top 1)
-    if "milieu_resid" in sub.columns:
-        row["milieu_mode"] = sub["milieu_resid"].mode(dropna=True).iloc[0] if not sub["milieu_resid"].mode(dropna=True).empty else np.nan
     if "region_name" in sub.columns:
         row["region_mode"] = sub["region_name"].mode(dropna=True).iloc[0] if not sub["region_name"].mode(dropna=True).empty else np.nan
+        
     if "marital_status" in sub.columns:
         row["statut_matrimonial_mode"] = sub["marital_status"].mode(dropna=True).iloc[0] if not sub["marital_status"].mode(dropna=True).empty else np.nan
     if "sex" in sub.columns:
