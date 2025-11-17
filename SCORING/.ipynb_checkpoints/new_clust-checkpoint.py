@@ -44,8 +44,7 @@ cat_vars = [
     "sex",
     "marital_status",
     "city",
-    #"milieu_resid",
-    #"region_name",
+    "region_name",
     "bancarise",
 ]
 
@@ -187,10 +186,8 @@ for c in sorted(df["cluster"].unique()):
         row["ville_mode"] = sub["city"].mode(dropna=True).iloc[0] if not sub["city"].mode(dropna=True).empty else np.nan  
          
     # répartition milieu/region (top 1)
-    #if "milieu_resid" in sub.columns:
-    #    row["milieu_mode"] = sub["milieu_resid"].mode(dropna=True).iloc[0] if not sub["milieu_resid"].mode(dropna=True).empty else np.nan
-    #if "region_name" in sub.columns:
-    #    row["region_mode"] = sub["region_name"].mode(dropna=True).iloc[0] if not sub["region_name"].mode(dropna=True).empty else np.nan
+    if "region_name" in sub.columns:
+        row["region_mode"] = sub["region_name"].mode(dropna=True).iloc[0] if not sub["region_name"].mode(dropna=True).empty else np.nan
         
     if "marital_status" in sub.columns:
         row["statut_matrimonial_mode"] = sub["marital_status"].mode(dropna=True).iloc[0] if not sub["marital_status"].mode(dropna=True).empty else np.nan
