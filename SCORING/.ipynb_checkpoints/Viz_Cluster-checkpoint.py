@@ -22,6 +22,105 @@ def safe_sort_clusters(cluster_list):
 st.set_page_config(page_title="Analyse des Clusters", layout="wide")
 st.title("🧬 Plateforme d'Analyse et Segmentation par Clusters")
 
+
+# ==========================================================
+# SECTION 0 : ANALYSE MILIEU DE RÉSIDENCE
+# ==========================================================
+st.header("🗺️ Analyse Milieu de Résidence par Région")
+
+uploaded_analyse = st.file_uploader(
+    "📌 Importer un dataset pour analyser milieu_resid vs region", 
+    type="csv",
+    key="upload_analyse"
+)
+
+if uploaded_analyse:
+    df_analyse = pd.read_csv(uploaded_analyse)
+    
+    if "region_name" in df_analyse.columns and "milieu_resid" in df_analyse.columns:
+        
+        # Tableau croisé
+        st.subheader("📊 Tableau croisé : Région × Milieu de résidence")
+        
+        cross_tab = pd.crosstab(
+            df_analyse["region_name"], 
+            df_analyse["milieu_resid"],
+            margins=True,
+            margins_name="Total"
+        )
+        
+        st.dataframe(cross_tab, use_container_width=True)
+        
+        # Pourcentages par région
+        st.subheader("📈 Pourcentages par région")
+        
+        cross_pct = pd.crosstab(
+            df_analyse["region_name"], 
+            df_analyse["milieu_resid"],
+            normalize='index'
+        ) * 100
+        
+        cross_pct = cross_pct.round(2)
+        st.dataframe(cross_pct.style.background_gradient(cmap='RdYlGn', axis=1), use_container_width=True)
+        
+        # Visualisation graphique
+        st.subheader("📊 Visualisation graphique")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.write("**Répartition par région (effectifs)**")
+            cross_tab_plot = cross_tab.drop('Total', errors='ignore').drop('Total', axis=1, errors='ignore')
+            st.bar_chart(cross_tab_plot)
+        
+        with col2:
+            st.write("**Répartition par région (pourcentages)**")
+            st.bar_chart(cross_pct)
+        
+        # Identification des régions mono-milieu
+        st.subheader("🔍 Identification des régions à milieu unique")
+        
+        regions_info = []
+        for region in df_analyse["region_name"].unique():
+            sub = df_analyse[df_analyse["region_name"] == region]
+            milieux = sub["milieu_resid"].unique()
+            
+            if len(milieux) == 1:
+                regions_info.append({
+                    "Région": region,
+                    "Milieu unique": milieux[0],
+                    "Effectif": len(sub),
+                    "Type": "🔴 Mono-milieu"
+                })
+            else:
+                pct = sub["milieu_resid"].value_counts(normalize=True) * 100
+                dominant = pct.idxmax()
+                pct_dominant = pct.max()
+                
+                regions_info.append({
+                    "Région": region,
+                    "Milieu dominant": f"{dominant} ({pct_dominant:.1f}%)",
+                    "Effectif": len(sub),
+                    "Type": "🟢 Multi-milieu"
+                })
+        
+        df_regions = pd.DataFrame(regions_info)
+        st.dataframe(df_regions, use_container_width=True)
+        
+        # Téléchargement de l'analyse
+        csv_analyse = df_regions.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Télécharger l'analyse des régions",
+            data=csv_analyse,
+            file_name="analyse_regions_milieu.csv",
+            mime="text/csv"
+        )
+        
+        st.divider()
+    else:
+        st.error("❌ Le dataset doit contenir les colonnes 'region_name' et 'milieu_resid'")
+
+
 # ==========================================================
 # SECTION 1 : UPLOAD ET GÉNÉRATION DES PROFILS
 # ==========================================================
@@ -42,8 +141,11 @@ if uploaded:
         st.error("❌ Le dataset doit contenir une colonne 'cluster'")
         st.stop()
     
-    st.success(f"✅ {df['cluster'].nunique()} clusters détectés : {sorted(df['cluster'].unique())}")
-
+    #st.success(f"✅ {df['cluster'].nunique()} clusters détectés : {sorted(df['cluster'].unique())}")
+   
+    # Forcer le type du cluster initial en string pour la suite
+    df["cluster"] = df["cluster"].astype("string")
+    
     # ==========================================================
     # GÉNÉRATION DES PROFILS
     # ==========================================================
@@ -100,8 +202,8 @@ if uploaded:
         selected = st.selectbox("📊 Sélectionner un cluster à explorer", cluster_ids)
         
         # Affichage du résumé
-        st.subheader(f"📝 Résumé du Cluster {selected}")
-        st.info(summaries[selected])
+        #st.subheader(f"📝 Résumé du Cluster {selected}")
+        #st.info(summaries[selected])
         
         # Colonnes pour organisation
         col1, col2 = st.columns(2)
@@ -186,7 +288,18 @@ if uploaded2:
             with st.spinner("Segmentation en cours..."):
                 result = assign_cluster_from_rules(df_new, formatted_rules)
             
+            # Harmoniser les types pour éviter les problèmes Arrow
+            result["cluster_assigned"] = result["cluster_assigned"].astype("string")
+            if "age_group" in result.columns:
+                result["age_group"] = result["age_group"].astype("string")
+            
             st.success("✅ Segmentation terminée !")
+
+            # Sauvegarde dans la session pour réutilisation sans recalcul
+            st.session_state["result"] = result
+            if "cluster" in locals() or "cluster" in df.columns:
+                st.session_state["df_initial"] = df.copy()
+
             
             # Statistiques de segmentation
             st.subheader("📊 Résultats de la segmentation")
@@ -212,19 +325,264 @@ if uploaded2:
             
             st.bar_chart(dist_sorted)
             
+            # Préparer le dataset final avec colonnes sélectionnées
+            display_cols = ["cluster_assigned"]
+            
+            # Ajouter les colonnes dans l'ordre souhaité si elles existent
+            desired_order = ["age_num", "sex", "marital_status", "city", "milieu_resid", "region_name", "bancarise"]
+            for col in desired_order:
+                if col in result.columns:
+                    display_cols.append(col)
+            
+            # Ajouter les autres colonnes restantes
+            for col in result.columns:
+                if col not in display_cols and col not in ["match_score", "age_group"]:
+                    display_cols.append(col)
+            
+            # Renommer cluster_assigned en cluster pour l'affichage
+            result_display = result[display_cols].copy()
+            result_display.rename(columns={"cluster_assigned": "cluster"}, inplace=True)
+            
             # Affichage du résultat
             st.subheader("🗂️ Dataset segmenté")
-            st.dataframe(result)
+            st.dataframe(result_display, use_container_width=True)
             
             # Téléchargement
-            csv = result.to_csv(index=False).encode('utf-8')
+            csv = result_display.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Télécharger les résultats (CSV)",
                 data=csv,
-                file_name="segmentation_results.csv",
+                file_name="Segmentation_Results.csv",
                 mime="text/csv"
             )
-    
+            print("______________________________________azerty__________________________")
+            print(f"df_new : {df_new}")
+            print(f"df_new columns : {df_new.columns}")
+            print(f"CSV : {result_display}")
+            
+            #____________________________________________________________________________
+
+            # ==========================================================
+            # ANALYSE CROISÉE : CLUSTERS INITIAUX VS PRÉDITS
+            # ==========================================================
+            if uploaded and "cluster" in df.columns:
+                print("______________________________________zerty__________________________")
+                st.divider()
+                st.header("🔍 Analyse croisée : Clusters initiaux vs Prédits")
+                
+                st.info("Cette analyse compare les clusters d'origine avec ceux prédits par les règles de segmentation.")
+                
+                # Préparer les données pour l'analyse
+                df_comparison = result.copy()
+                df_comparison["cluster_initial"] = df["cluster"].astype("string")
+                df_comparison["cluster_predit"] = df_comparison["cluster_assigned"].astype("string")
+                
+                # Indicateur de concordance
+                df_comparison["concordance"] = df_comparison["cluster_initial"] == df_comparison["cluster_predit"]
+
+                if "Modalité" in df_comparison.columns:
+                    df_comparison["Modalité"] = df_comparison["Modalité"].astype("string")
+                
+                st.session_state["df_comparison"] = df_comparison.copy()
+
+                
+                # =================== STATISTIQUES GLOBALES ===================
+                st.subheader("📊 Statistiques globales")
+                
+                col1, col2, col3, col4 = st.columns(4)
+                
+                total = len(df_comparison)
+                concordants = df_comparison["concordance"].sum()
+                non_concordants = total - concordants
+                taux_concordance = (concordants / total) * 100
+                
+                with col1:
+                    st.metric("Total individus", total)
+                with col2:
+                    st.metric("✅ Concordants", concordants, delta=f"{taux_concordance:.1f}%")
+                with col3:
+                    st.metric("❌ Non concordants", non_concordants, delta=f"{100-taux_concordance:.1f}%", delta_color="inverse")
+                with col4:
+                    non_assignes = (df_comparison["cluster_predit"] == "Aucun").sum()
+                    st.metric("⚠️ Non assignés", non_assignes)
+                
+                # =================== MATRICE DE CONFUSION ===================
+                st.subheader("📋 Matrice de confusion")
+                
+                confusion_matrix = pd.crosstab(
+                    df_comparison["cluster_initial"],
+                    df_comparison["cluster_predit"],
+                    rownames=["Cluster Initial"],
+                    colnames=["Cluster Prédit"],
+                    margins=True,
+                    margins_name="Total"
+                )
+                
+                confusion_matrix = confusion_matrix.astype("int64")
+                st.dataframe(confusion_matrix, use_container_width=True)
+                
+                # Taux de concordance par cluster initial
+                st.subheader("📈 Taux de concordance par cluster initial")
+                
+                concordance_by_cluster = []
+                for cluster in sorted(df_comparison["cluster_initial"].unique(), key=str):
+                    sub = df_comparison[df_comparison["cluster_initial"] == cluster]
+                    total_cluster = len(sub)
+                    concordant = sub["concordance"].sum()
+                    non_concordant = total_cluster - concordant
+                    non_assigne = (sub["cluster_predit"] == "Aucun").sum()
+                    taux = (concordant / total_cluster) * 100 if total_cluster > 0 else 0
+                    
+                    concordance_by_cluster.append({
+                        "Cluster": cluster,
+                        "Total": total_cluster,
+                        "✅ Concordants": concordant,
+                        "❌ Non concordants": non_concordant,
+                        "⚠️ Non assignés": non_assigne,
+                        "Taux concordance (%)": round(taux, 1)
+                    })
+                
+                df_concordance = pd.DataFrame(concordance_by_cluster)
+                
+                # Graphique de concordance
+                col1, col2 = st.columns([2, 1])
+                
+                with col1:
+                    st.dataframe(df_concordance, use_container_width=True, hide_index=True)
+                
+                with col2:
+                    chart_data = df_concordance.set_index("Cluster")["Taux concordance (%)"]
+                    st.bar_chart(chart_data)
+                    
+                # Analyse des erreurs par cluster
+                st.subheader("🔎 Détail des erreurs par cluster initial")
+                
+                cluster_options = safe_sort_clusters(df_comparison["cluster_initial"].astype(str).unique().tolist())
+                
+                cluster_to_analyze = st.selectbox(
+                    "Sélectionner un cluster à analyser en détail",
+                    options=cluster_options
+                )
+                
+                # Filtrer les erreurs pour ce cluster
+                errors = df_comparison[
+                    (df_comparison["cluster_initial"].astype(str) == str(cluster_to_analyze)) & 
+                    (~df_comparison["concordance"])
+                ]
+                
+                # Comparer avec les individus correctement classés
+                correct = df_comparison[
+                    (df_comparison["cluster_initial"].astype(str) == str(cluster_to_analyze)) & 
+                    (df_comparison["concordance"])
+                ]
+                
+                if len(errors) > 0:
+                    st.warning(f"⚠️ {len(errors)} individus mal classés pour le cluster {cluster_to_analyze}")
+                    
+                    # Distribution des prédictions erronées
+                    st.write(f"**Où sont-ils prédits ?**")
+                    error_dist = errors["cluster_predit"].value_counts()
+                    
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        st.dataframe(error_dist.rename("Effectif"), use_container_width=True)
+                    with col2:
+                        st.bar_chart(error_dist)
+                    
+                    # Analyse des variables pour comprendre les erreurs
+                    st.write(f"**Analyse des différences par variable**")
+                    
+                    # Variables de segmentation à analyser
+                    vars_to_check = [v for v in SEGMENTATION_VARS if v in errors.columns]
+                    
+                    differences = []
+                    
+                    
+                    for var in vars_to_check:
+                        # Distribution dans les erreurs
+                        error_dist_var = errors[var].value_counts(normalize=True) * 100
+                        # Distribution dans les corrects
+                        correct_dist_var = correct[var].value_counts(normalize=True) * 100
+                        
+                        # Identifier les modalités problématiques
+                        for modality in error_dist_var.index:
+                            pct_error = error_dist_var.get(modality, 0)
+                            pct_correct = correct_dist_var.get(modality, 0)
+                            diff = pct_error - pct_correct
+                            
+                            if abs(diff) > 5:  # Différence significative
+                                differences.append({
+                                    "Variable": var,
+                                    "Modalité": modality,
+                                    "% dans erreurs": round(pct_error, 1),
+                                    "% dans corrects": round(pct_correct, 1),
+                                    "Différence": round(diff, 1),
+                                    "Impact": "🔴 Sur-représenté" if diff > 0 else "🟢 Sous-représenté"
+                                })
+                    
+                    if differences:
+                        df_diff = pd.DataFrame(differences).sort_values("Différence", key=abs, ascending=False)
+                        st.dataframe(df_diff, use_container_width=True, hide_index=True)
+                        
+                        st.info("""
+                        **💡 Interprétation :**
+                        - **🔴 Sur-représenté** : Cette modalité apparaît plus souvent dans les erreurs → Peut-être ajouter/modifier une règle
+                        - **🟢 Sous-représenté** : Cette modalité apparaît moins dans les erreurs → La règle fonctionne bien pour elle
+                        """)
+                    else:
+                        st.success("Pas de différence significative détectée sur les variables de segmentation")
+                    
+                    # Afficher quelques exemples d'erreurs
+                    st.write(f"**📋 Exemples d'individus mal classés (max 20)**")
+                    
+                    cols_to_show = ["cluster_initial", "cluster_predit"]
+                    if "match_score" in errors.columns:
+                        cols_to_show.append("match_score")
+                    cols_to_show += vars_to_check
+                    cols_to_show = [c for c in cols_to_show if c in errors.columns]
+                    
+                    st.dataframe(errors[cols_to_show].head(20), use_container_width=True)
+                    
+                    # Export des erreurs
+                    csv_errors = errors.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label=f"📥 Télécharger toutes les erreurs du cluster {cluster_to_analyze}",
+                        data=csv_errors,
+                        file_name=f"erreurs_cluster_{cluster_to_analyze}.csv",
+                        mime="text/csv"
+                    )
+                    
+                else:
+                    st.success(f"✅ Tous les individus du cluster {cluster_to_analyze} sont correctement classés !")
+                
+                # Export de l'analyse complète
+                st.divider()
+                st.subheader("📥 Exports")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    # Export matrice de confusion
+                    csv_confusion = confusion_matrix.to_csv().encode('utf-8')
+                    st.download_button(
+                        label="📥 Télécharger la matrice de confusion",
+                        data=csv_confusion,
+                        file_name="matrice_confusion.csv",
+                        mime="text/csv"
+                    )
+                
+                with col2:
+                    # Export de tous les non-concordants
+                    all_errors = df_comparison[~df_comparison["concordance"]]
+                    csv_all_errors = all_errors.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Télécharger tous les non-concordants",
+                        data=csv_all_errors,
+                        file_name="tous_non_concordants.csv",
+                        mime="text/csv"
+                    )
+            #____________________________________________________________________________
+            
     except FileNotFoundError:
         st.error("⚠️ Aucune règle trouvée. Veuillez d'abord générer les profils dans la section précédente.")
     except Exception as e:
