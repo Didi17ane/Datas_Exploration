@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import json
-from Regle import generate_cluster_profiles, assign_cluster_from_rules
+from Regle_Segmentation import generate_cluster_profiles, assign_cluster_from_rules
 
 # Variables utilisées pour la segmentation
 SEGMENTATION_VARS = [
@@ -79,7 +79,7 @@ if uploaded:
                 for var, vals in v.items()
             }
         
-        with open("cluster_rules.json", "w", encoding="utf-8") as f:
+        with open("./Rules Clusters/cluster_rules.json", "w", encoding="utf-8") as f:
             json.dump(rules_jsonable, f, ensure_ascii=False, indent=4)
         
         st.info("💾 Règles sauvegardées dans `cluster_rules.json`")
@@ -167,7 +167,7 @@ if uploaded2:
     
     # Charger les règles
     try:
-        with open("cluster_rules.json", "r", encoding="utf-8") as f:
+        with open("./Rules Clusters/cluster_rules.json", "r", encoding="utf-8") as f:
             rules_loaded = json.load(f)
         
         # Reconvertir au format attendu (forcer tous les clusters en int si possible)

@@ -190,8 +190,8 @@ if __name__ == "__main__":
     profiles, summaries, rules, df_modalities = generate_cluster_profiles(df, threshold=0.8)
 
     # Sauvegardes
-    pd.Series(summaries).rename("summary").to_csv("cluster_summaries.csv", index=True)
-    df_modalities.to_csv("cluster_modalities.csv", index=False)
+    pd.Series(summaries).rename("summary").to_csv("./Rules Clusters/cluster_summaries.csv", index=True)
+    df_modalities.to_csv("./Rules Clusters/cluster_modalities.csv", index=False)
 
     # Règles en JSON
     rules_jsonable = {
@@ -199,7 +199,7 @@ if __name__ == "__main__":
         for k, v in rules.items()
     }
     
-    with open("cluster_rules.json", "w", encoding="utf-8") as f:
+    with open("./Rules Clusters/cluster_rules.json", "w", encoding="utf-8") as f:
         json.dump(rules_jsonable, f, ensure_ascii=False, indent=4)
 
     # Profils numériques
@@ -212,6 +212,6 @@ if __name__ == "__main__":
     
     if rows:
         df_profiles_num = pd.concat(rows, ignore_index=True)
-        df_profiles_num.to_csv("cluster_profiles_numeric.csv", index=False)
+        df_profiles_num.to_csv("./Rules Clusters/cluster_profiles_numeric.csv", index=False)
 
     print("✅ Exports terminés : cluster_summaries.csv, cluster_modalities.csv, cluster_rules.json, cluster_profiles_numeric.csv")
