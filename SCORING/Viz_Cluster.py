@@ -293,14 +293,22 @@ if uploaded2:
             if "age_group" in result.columns:
                 result["age_group"] = result["age_group"].astype("string")
             
-            st.success("✅ Segmentation terminée !")
-
             # Sauvegarde dans la session pour réutilisation sans recalcul
             st.session_state["result"] = result
-            if "cluster" in locals() or "cluster" in df.columns:
+            st.session_state["df_new"] = df_new
+            if uploaded and "cluster" in df.columns:
                 st.session_state["df_initial"] = df.copy()
 
+            st.session_state["segmentation_done"] = True
+            st.success("✅ Segmentation terminée !")
             
+        # ==========================================================
+        # SECTION AFFICHAGE / ANALYSE APRES SEGMENTATION
+        # ==========================================================
+        if st.session_state.get("segmentation_done", False):
+
+            result = st.session_state["result"]
+
             # Statistiques de segmentation
             st.subheader("📊 Résultats de la segmentation")
             
@@ -315,7 +323,7 @@ if uploaded2:
                 if len(assigned) > 0:
                     st.metric("Taux d'assignation", f"{len(assigned)/len(result)*100:.1f}%")
                     st.metric("Score moyen de correspondance", f"{assigned['match_score'].mean():.2f}")
-            
+        
             # Distribution par cluster
             st.subheader("📈 Distribution par cluster")
             dist = result["cluster_assigned"].value_counts()
