@@ -1,0 +1,101 @@
+marital_status,bancarise,region_name,city,milieu_resid,age_num,sex
+Célibataire,1,divo,centre divo,Rural,37,F
+Veuf(ve),1,bouaké,centre bouaké,Rural,47,F
+Célibataire,1,anyama,centre anyama,Rural,29,F
+Célibataire,0,san-pédro,centre san-pédro,Rural,24,F
+Veuf(ve),0,daloa,centre daloa,Rural,59,F
+Marié(e),1,anyama,centre anyama,Rural,59,M
+Marié(e),0,gagnoa,centre gagnoa,Rural,22,M
+Célibataire,1,abidjan,abobo,Urbain,46,F
+Divorcé(e),0,anyama,centre anyama,Rural,41,M
+Célibataire,1,divo,centre divo,Rural,47,F
+Célibataire,0,man,centre man,Rural,47,M
+Célibataire,1,san-pédro,centre san-pédro,Rural,53,M
+Célibataire,0,grand-bassam,centre grand-bassam,Urbain,23,F
+Veuf(ve),1,anyama,centre anyama,Rural,34,F
+Veuf(ve),1,bouaké,centre bouaké,Rural,31,F
+Célibataire,1,daloa,centre daloa,Rural,40,F
+Veuf(ve),1,abidjan,treichville,Urbain,25,F
+Marié(e),0,gagnoa,centre gagnoa,Rural,33,M
+Veuf(ve),0,grand-bassam,centre grand-bassam,Urbain,42,F
+Veuf(ve),0,grand-bassam,centre grand-bassam,Urbain,39,F
+Marié(e),0,grand-bassam,centre grand-bassam,Urbain,58,F
+Célibataire,1,san-pédro,centre san-pédro,Rural,36,M
+Célibataire,0,daloa,centre daloa,Rural,65,F
+Divorcé(e),1,divo,centre divo,Rural,40,M
+Veuf(ve),1,anyama,centre anyama,Rural,19,F
+Veuf(ve),1,yamoussoukro,centre yamoussoukro,Urbain,60,M
+Marié(e),0,bouaké,centre bouaké,Rural,26,M
+Veuf(ve),0,bouaké,centre bouaké,Rural,47,M
+Marié(e),1,bouaké,centre bouaké,Rural,55,F
+Célibataire,1,divo,centre divo,Rural,30,M
+Veuf(ve),0,bouaké,centre bouaké,Rural,24,M
+Célibataire,1,yamoussoukro,centre yamoussoukro,Urbain,23,F
+Célibataire,0,yamoussoukro,centre yamoussoukro,Urbain,36,M
+Veuf(ve),1,bouaké,centre bouaké,Rural,20,M
+Marié(e),0,grand-bassam,centre grand-bassam,Urbain,46,M
+Célibataire,1,korhogo,centre korhogo,Rural,32,M
+Divorcé(e),0,gagnoa,centre gagnoa,Rural,36,F
+Divorcé(e),1,gagnoa,centre gagnoa,Rural,33,F
+Divorcé(e),0,abidjan,abobo,Urbain,66,F
+Marié(e),1,anyama,centre anyama,Rural,60,M
+Célibataire,0,yamoussoukro,centre yamoussoukro,Urbain,34,M
+Marié(e),1,gagnoa,centre gagnoa,Rural,48,M
+Divorcé(e),1,man,centre man,Rural,47,M
+Divorcé(e),0,daloa,centre daloa,Rural,37,M
+Divorcé(e),1,korhogo,centre korhogo,Rural,34,M
+Marié(e),0,divo,centre divo,Rural,48,F
+Marié(e),1,gagnoa,centre gagnoa,Rural,19,M
+Célibataire,0,divo,centre divo,Rural,31,F
+Célibataire,1,anyama,centre anyama,Rural,65,F
+Marié(e),0,abidjan,cocody,Urbain,23,M
+Marié(e),0,bouaké,centre bouaké,Rural,36,F
+Célibataire,0,anyama,centre anyama,Rural,36,F
+Divorcé(e),0,korhogo,centre korhogo,Rural,48,M
+Célibataire,1,anyama,centre anyama,Rural,48,M
+Marié(e),1,san-pédro,centre san-pédro,Rural,20,M
+Divorcé(e),0,san-pédro,centre san-pédro,Rural,24,F
+Divorcé(e),1,yamoussoukro,centre yamoussoukro,Urbain,31,M
+Veuf(ve),1,gagnoa,centre gagnoa,Rural,40,F
+Marié(e),1,grand-bassam,centre grand-bassam,Urbain,26,F
+Veuf(ve),1,yamoussoukro,centre yamoussoukro,Urbain,35,F
+Veuf(ve),1,anyama,centre anyama,Rural,37,F
+Veuf(ve),1,grand-bassam,centre grand-bassam,Urbain,27,F
+Marié(e),0,daloa,centre daloa,Rural,51,F
+Divorcé(e),1,gagnoa,centre gagnoa,Rural,31,F
+Célibataire,0,man,centre man,Rural,42,F
+Divorcé(e),0,divo,centre divo,Rural,55,M
+Divorcé(e),0,divo,centre divo,Rural,37,F
+Divorcé(e),1,bouaké,centre bouaké,Rural,37,F
+Célibataire,1,anyama,centre anyama,Rural,18,F
+Célibataire,1,anyama,centre anyama,Rural,38,M
+Divorcé(e),0,abidjan,abobo,Urbain,31,F
+Marié(e),1,gagnoa,centre gagnoa,Rural,65,F
+Divorcé(e),0,korhogo,centre korhogo,Rural,48,F
+Célibataire,0,abidjan,adjamé,Urbain,62,F
+Divorcé(e),0,san-pédro,centre san-pédro,Rural,20,F
+Veuf(ve),0,abidjan,abobo,Urbain,61,F
+Célibataire,0,san-pédro,centre san-pédro,Rural,25,M
+Marié(e),0,abidjan,port-bouët,Urbain,49,M
+Marié(e),1,man,centre man,Rural,28,M
+Veuf(ve),1,daloa,centre daloa,Rural,25,M
+Marié(e),0,yamoussoukro,centre yamoussoukro,Urbain,62,M
+Marié(e),0,korhogo,centre korhogo,Rural,29,F
+Veuf(ve),1,divo,centre divo,Rural,20,F
+Veuf(ve),1,abidjan,attécoubé,Urbain,22,F
+Célibataire,0,korhogo,centre korhogo,Rural,20,M
+Divorcé(e),1,grand-bassam,centre grand-bassam,Urbain,49,M
+Veuf(ve),1,grand-bassam,centre grand-bassam,Urbain,30,M
+Veuf(ve),1,bouaké,centre bouaké,Rural,27,F
+Marié(e),1,san-pédro,centre san-pédro,Rural,52,M
+Marié(e),0,san-pédro,centre san-pédro,Rural,64,F
+Célibataire,0,bouaké,centre bouaké,Rural,42,F
+Veuf(ve),0,abidjan,adjamé,Urbain,35,F
+Marié(e),1,man,centre man,Rural,44,F
+Célibataire,0,korhogo,centre korhogo,Rural,58,M
+Marié(e),1,abidjan,marcory,Urbain,66,M
+Célibataire,1,man,centre man,Rural,62,F
+Divorcé(e),0,korhogo,centre korhogo,Rural,33,M
+Veuf(ve),0,daloa,centre daloa,Rural,43,M
+Veuf(ve),1,gagnoa,centre gagnoa,Rural,40,M
+Divorcé(e),0,abidjan,treichville,Urbain,24,M

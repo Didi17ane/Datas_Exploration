@@ -384,6 +384,9 @@ if uploaded2:
                 df_comparison = result.copy()
                 df_comparison["cluster_initial"] = df["cluster"].astype("string")
                 df_comparison["cluster_predit"] = df_comparison["cluster_assigned"].astype("string")
+
+                if "Modalité" in df_comparison.columns:
+                    df_comparison["Modalité"] = df_comparison["Modalité"].astype("string")
                 
                 # Indicateur de concordance
                 df_comparison["concordance"] = df_comparison["cluster_initial"] == df_comparison["cluster_predit"]
@@ -530,6 +533,11 @@ if uploaded2:
                     
                     if differences:
                         df_diff = pd.DataFrame(differences).sort_values("Différence", key=abs, ascending=False)
+                       
+                        # >>> FIX Arrow : forcer Modalité en string
+                        if "Modalité" in df_diff.columns:
+                            df_diff["Modalité"] = df_diff["Modalité"].astype("string")
+                        # <<<
                         st.dataframe(df_diff, use_container_width=True, hide_index=True)
                         
                         st.info("""
