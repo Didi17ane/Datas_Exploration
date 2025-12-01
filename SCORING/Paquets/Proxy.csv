@@ -1,0 +1,101 @@
+marital_status,bancarise,city,milieu_resid,age_num,sex,region_name
+Célibataire,1,DIVO,Urbain,37,F,LÔH-DJIBOUA
+Veuf(ve),1,BOUAKÉ,Urbain,47,F,GBEKE
+Célibataire,1,ANYAMA,Urbain,29,F,AUTONOME D'ABIDJAN
+Célibataire,0,SAN-PÉDRO,Urbain,24,F,SAN-PEDRO
+Veuf(ve),0,DALOA,Urbain,59,F,HAUT-SASSANDRA
+Marié(e),1,ANYAMA,Urbain,59,M,AUTONOME D'ABIDJAN
+Marié(e),0,GAGNOA,Urbain,22,M,GÔH
+Célibataire,1,ABOBO,Urbain,46,F,AUTONOME D'ABIDJAN
+Divorcé(e),0,ANYAMA,Urbain,41,M,AUTONOME D'ABIDJAN
+Célibataire,1,DIVO,Urbain,47,F,LÔH-DJIBOUA
+Célibataire,0,MAN,Urbain,47,M,TONKPI
+Célibataire,1,SAN-PÉDRO,Urbain,53,M,SAN-PEDRO
+Célibataire,0,GRAND-BASSAM,Urbain,23,F,SUD-COMOE
+Veuf(ve),1,ANYAMA,Urbain,34,F,AUTONOME D'ABIDJAN
+Veuf(ve),1,BOUAKÉ,Urbain,31,F,GBEKE
+Célibataire,1,DALOA,Urbain,40,F,HAUT-SASSANDRA
+Veuf(ve),1,TREICHVILLE,Urbain,25,F,AUTONOME D'ABIDJAN
+Marié(e),0,GAGNOA,Urbain,33,M,GÔH
+Veuf(ve),0,GRAND-BASSAM,Urbain,42,F,SUD-COMOE
+Veuf(ve),0,GRAND-BASSAM,Urbain,39,F,SUD-COMOE
+Marié(e),0,GRAND-BASSAM,Urbain,58,F,SUD-COMOE
+Célibataire,1,SAN-PÉDRO,Urbain,36,M,SAN-PEDRO
+Célibataire,0,DALOA,Urbain,65,F,HAUT-SASSANDRA
+Divorcé(e),1,DIVO,Urbain,40,M,LÔH-DJIBOUA
+Veuf(ve),1,ANYAMA,Urbain,19,F,AUTONOME D'ABIDJAN
+Veuf(ve),1,YAMOUSSOUKRO,Urbain,60,M,YAMOUSSOUKRO
+Marié(e),0,BOUAKÉ,Urbain,26,M,GBEKE
+Veuf(ve),0,BOUAKÉ,Urbain,47,M,GBEKE
+Marié(e),1,BOUAKÉ,Urbain,55,F,GBEKE
+Célibataire,1,DIVO,Urbain,30,M,LÔH-DJIBOUA
+Veuf(ve),0,BOUAKÉ,Urbain,24,M,GBEKE
+Célibataire,1,YAMOUSSOUKRO,Urbain,23,F,YAMOUSSOUKRO
+Célibataire,0,YAMOUSSOUKRO,Urbain,36,M,YAMOUSSOUKRO
+Veuf(ve),1,BOUAKÉ,Urbain,20,M,GBEKE
+Marié(e),0,GRAND-BASSAM,Urbain,46,M,SUD-COMOE
+Célibataire,1,KORHOGO,Urbain,32,M,PORO
+Divorcé(e),0,GAGNOA,Urbain,36,F,GÔH
+Divorcé(e),1,GAGNOA,Urbain,33,F,GÔH
+Divorcé(e),0,ABOBO,Urbain,66,F,AUTONOME D'ABIDJAN
+Marié(e),1,ANYAMA,Urbain,60,M,AUTONOME D'ABIDJAN
+Célibataire,0,YAMOUSSOUKRO,Urbain,34,M,YAMOUSSOUKRO
+Marié(e),1,GAGNOA,Urbain,48,M,GÔH
+Divorcé(e),1,MAN,Urbain,47,M,TONKPI
+Divorcé(e),0,DALOA,Urbain,37,M,HAUT-SASSANDRA
+Divorcé(e),1,KORHOGO,Urbain,34,M,PORO
+Marié(e),0,DIVO,Urbain,48,F,LÔH-DJIBOUA
+Marié(e),1,GAGNOA,Urbain,19,M,GÔH
+Célibataire,0,DIVO,Urbain,31,F,LÔH-DJIBOUA
+Célibataire,1,ANYAMA,Urbain,65,F,AUTONOME D'ABIDJAN
+Marié(e),0,COCODY,Urbain,23,M,AUTONOME D'ABIDJAN
+Marié(e),0,BOUAKÉ,Urbain,36,F,GBEKE
+Célibataire,0,ANYAMA,Urbain,36,F,AUTONOME D'ABIDJAN
+Divorcé(e),0,KORHOGO,Urbain,48,M,PORO
+Célibataire,1,ANYAMA,Urbain,48,M,AUTONOME D'ABIDJAN
+Marié(e),1,SAN-PÉDRO,Urbain,20,M,SAN-PEDRO
+Divorcé(e),0,SAN-PÉDRO,Urbain,24,F,SAN-PEDRO
+Divorcé(e),1,YAMOUSSOUKRO,Urbain,31,M,YAMOUSSOUKRO
+Veuf(ve),1,GAGNOA,Urbain,40,F,GÔH
+Marié(e),1,GRAND-BASSAM,Urbain,26,F,SUD-COMOE
+Veuf(ve),1,YAMOUSSOUKRO,Urbain,35,F,YAMOUSSOUKRO
+Veuf(ve),1,ANYAMA,Urbain,37,F,AUTONOME D'ABIDJAN
+Veuf(ve),1,GRAND-BASSAM,Urbain,27,F,SUD-COMOE
+Marié(e),0,DALOA,Urbain,51,F,HAUT-SASSANDRA
+Divorcé(e),1,GAGNOA,Urbain,31,F,GÔH
+Célibataire,0,MAN,Urbain,42,F,TONKPI
+Divorcé(e),0,DIVO,Urbain,55,M,LÔH-DJIBOUA
+Divorcé(e),0,DIVO,Urbain,37,F,LÔH-DJIBOUA
+Divorcé(e),1,BOUAKÉ,Urbain,37,F,GBEKE
+Célibataire,1,ANYAMA,Urbain,18,F,AUTONOME D'ABIDJAN
+Célibataire,1,ANYAMA,Urbain,38,M,AUTONOME D'ABIDJAN
+Divorcé(e),0,ABOBO,Urbain,31,F,AUTONOME D'ABIDJAN
+Marié(e),1,GAGNOA,Urbain,65,F,GÔH
+Divorcé(e),0,KORHOGO,Urbain,48,F,PORO
+Célibataire,0,ADJAMÉ,Urbain,62,F,AUTONOME D'ABIDJAN
+Divorcé(e),0,SAN-PÉDRO,Urbain,20,F,SAN-PEDRO
+Veuf(ve),0,ABOBO,Urbain,61,F,AUTONOME D'ABIDJAN
+Célibataire,0,SAN-PÉDRO,Urbain,25,M,SAN-PEDRO
+Marié(e),0,PORT-BOUËT,Urbain,49,M,AUTONOME D'ABIDJAN
+Marié(e),1,MAN,Urbain,28,M,TONKPI
+Veuf(ve),1,DALOA,Urbain,25,M,HAUT-SASSANDRA
+Marié(e),0,YAMOUSSOUKRO,Urbain,62,M,YAMOUSSOUKRO
+Marié(e),0,KORHOGO,Urbain,29,F,PORO
+Veuf(ve),1,DIVO,Urbain,20,F,LÔH-DJIBOUA
+Veuf(ve),1,ATTÉCOUBÉ,Urbain,22,F,AUTONOME D'ABIDJAN
+Célibataire,0,KORHOGO,Urbain,20,M,PORO
+Divorcé(e),1,GRAND-BASSAM,Urbain,49,M,SUD-COMOE
+Veuf(ve),1,GRAND-BASSAM,Urbain,30,M,SUD-COMOE
+Veuf(ve),1,BOUAKÉ,Urbain,27,F,GBEKE
+Marié(e),1,SAN-PÉDRO,Urbain,52,M,SAN-PEDRO
+Marié(e),0,SAN-PÉDRO,Urbain,64,F,SAN-PEDRO
+Célibataire,0,BOUAKÉ,Urbain,42,F,GBEKE
+Veuf(ve),0,ADJAMÉ,Urbain,35,F,AUTONOME D'ABIDJAN
+Marié(e),1,MAN,Urbain,44,F,TONKPI
+Célibataire,0,KORHOGO,Urbain,58,M,PORO
+Marié(e),1,MARCORY,Urbain,66,M,AUTONOME D'ABIDJAN
+Célibataire,1,MAN,Urbain,62,F,TONKPI
+Divorcé(e),0,KORHOGO,Urbain,33,M,PORO
+Veuf(ve),0,DALOA,Urbain,43,M,HAUT-SASSANDRA
+Veuf(ve),1,GAGNOA,Urbain,40,M,GÔH
+Divorcé(e),0,TREICHVILLE,Urbain,24,M,AUTONOME D'ABIDJAN

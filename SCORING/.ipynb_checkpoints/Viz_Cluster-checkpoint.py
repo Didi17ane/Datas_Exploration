@@ -26,7 +26,7 @@ st.title("🧬 Plateforme d'Analyse et Segmentation par Clusters")
 # ==========================================================
 # SECTION 0 : ANALYSE MILIEU DE RÉSIDENCE
 # ==========================================================
-st.header("🗺️ Analyse Milieu de Résidence par Région")
+st.header("🗺️ Analyse Milieu de Résidence par Sous-Prefecture")
 
 uploaded_analyse = st.file_uploader(
     "📌 Importer un dataset pour analyser milieu_resid vs region", 
@@ -37,13 +37,13 @@ uploaded_analyse = st.file_uploader(
 if uploaded_analyse:
     df_analyse = pd.read_csv(uploaded_analyse)
     
-    if "region_name" in df_analyse.columns and "milieu_resid" in df_analyse.columns:
+    if "city" in df_analyse.columns and "milieu_resid" in df_analyse.columns:
         
         # Tableau croisé
-        st.subheader("📊 Tableau croisé : Région × Milieu de résidence")
+        st.subheader("📊 Tableau croisé : Sous-Préfecture × Milieu de résidence")
         
         cross_tab = pd.crosstab(
-            df_analyse["region_name"], 
+            df_analyse["city"], 
             df_analyse["milieu_resid"],
             margins=True,
             margins_name="Total"
@@ -52,42 +52,51 @@ if uploaded_analyse:
         st.dataframe(cross_tab, use_container_width=True)
         
         # Pourcentages par région
-        st.subheader("📈 Pourcentages par région")
+        st.subheader("📈 Pourcentages par Sous-Préfecture")
         
         cross_pct = pd.crosstab(
-            df_analyse["region_name"], 
+            df_analyse["city"], 
             df_analyse["milieu_resid"],
             normalize='index'
         ) * 100
         
         cross_pct = cross_pct.round(2)
         st.dataframe(cross_pct.style.background_gradient(cmap='RdYlGn', axis=1), use_container_width=True)
-        
+
+        csv_cross = cross_pct.to_csv(index=True).encode("utf-8")
+
+        st.download_button(
+            label="📥 Télécharger les pourcentages (CSV)",
+            data=csv_cross,
+            file_name="pourcentages_sous_prefecture.csv",
+            mime="text/csv",
+            key="download_cross_pct"
+        )
         # Visualisation graphique
         st.subheader("📊 Visualisation graphique")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.write("**Répartition par région (effectifs)**")
+            st.write("**Répartition par sous-préfecture (effectifs)**")
             cross_tab_plot = cross_tab.drop('Total', errors='ignore').drop('Total', axis=1, errors='ignore')
             st.bar_chart(cross_tab_plot)
         
         with col2:
-            st.write("**Répartition par région (pourcentages)**")
+            st.write("**Répartition par sous-préfecture (pourcentages)**")
             st.bar_chart(cross_pct)
         
         # Identification des régions mono-milieu
-        st.subheader("🔍 Identification des régions à milieu unique")
+        st.subheader("🔍 Identification des sous-préfecture à milieu unique")
         
-        regions_info = []
-        for region in df_analyse["region_name"].unique():
-            sub = df_analyse[df_analyse["region_name"] == region]
+        Spréfecture_info = []
+        for sp in df_analyse["city"].unique():
+            sub = df_analyse[df_analyse["city"] == sp]
             milieux = sub["milieu_resid"].unique()
             
             if len(milieux) == 1:
-                regions_info.append({
-                    "Région": region,
+                Spréfecture_info.append({
+                    "Sous-Préfecture": sp,
                     "Milieu unique": milieux[0],
                     "Effectif": len(sub),
                     "Type": "🔴 Mono-milieu"
@@ -97,28 +106,28 @@ if uploaded_analyse:
                 dominant = pct.idxmax()
                 pct_dominant = pct.max()
                 
-                regions_info.append({
-                    "Région": region,
+                Spréfecture_info.append({
+                    "Sous-Préfecture": sp,
                     "Milieu dominant": f"{dominant} ({pct_dominant:.1f}%)",
                     "Effectif": len(sub),
                     "Type": "🟢 Multi-milieu"
                 })
         
-        df_regions = pd.DataFrame(regions_info)
-        st.dataframe(df_regions, use_container_width=True)
+        df_sp = pd.DataFrame(Spréfecture_info)
+        st.dataframe(df_sp, use_container_width=True)
         
         # Téléchargement de l'analyse
-        csv_analyse = df_regions.to_csv(index=False).encode('utf-8')
+        csv_analyse = df_sp.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="📥 Télécharger l'analyse des régions",
             data=csv_analyse,
-            file_name="analyse_regions_milieu.csv",
+            file_name="analyse_SPrefecture_milieu.csv",
             mime="text/csv"
         )
         
         st.divider()
     else:
-        st.error("❌ Le dataset doit contenir les colonnes 'region_name' et 'milieu_resid'")
+        st.error("❌ Le dataset doit contenir les colonnes 'city' et 'milieu_resid'")
 
 
 # ==========================================================

@@ -155,32 +155,40 @@ def assign_cluster_from_rules(df_new, rules):
     df_result["cluster_assigned"] = "Aucun"
     df_result["match_score"] = 0
 
-    for cluster_id, conditions in rules.items():
-        mask = pd.Series(True, index=df_result.index)
-        score = 0
+    # pré-calcul : nombre de conditions par cluster
+    cluster_n_cond = {cl: len(conds) for cl, conds in rules.items()}
 
-        for var, allowed_values in conditions.items():
-            if var not in df_result.columns:
-                mask &= False
+    for idx in df_result.index:
+        best_cluster = "Aucun"
+        best_score = 0
+        best_ratio = 0.0
+
+        for cluster_id, conditions in rules.items():
+            matched = 0
+            n_cond = cluster_n_cond[cluster_id]
+
+            for var, allowed_values in conditions.items():
+                if var in df_result.columns:
+                    if str(df_result.loc[idx, var]) in [str(v) for v in allowed_values]:
+                        matched += 1
+
+            if n_cond == 0:
                 continue
-            
-            var_mask = df_result[var].astype(str).isin([str(v) for v in allowed_values])
-            mask &= var_mask
 
-        # Compter le nombre de conditions respectées
-        for idx in df_result[mask].index:
-            matched = sum(
-                1 for var, vals in conditions.items()
-                if var in df_result.columns and str(df_result.loc[idx, var]) in [str(v) for v in vals]
-            )
-            
-            # Assigner si meilleur score
-            if matched > df_result.loc[idx, "match_score"]:
-                df_result.loc[idx, "cluster_assigned"] = cluster_id
-                df_result.loc[idx, "match_score"] = matched
+            ratio = matched / n_cond  # % de règles respectées
+
+            # critère : au moins X% de règles respectées, et meilleur ratio
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_score = matched
+                best_cluster = cluster_id
+
+        # seuil minimal pour assigner (ex: 0.5 = au moins la moitié des règles)
+        if best_ratio >= 0.5:
+            df_result.loc[idx, "cluster_assigned"] = best_cluster
+            df_result.loc[idx, "match_score"] = best_score
 
     return df_result
-
 
 # -------------------------
 # Exemple d'utilisation
