@@ -18,8 +18,8 @@ from sklearn.decomposition import PCA
 # 1) Paramètres
 # ==========
 INPUT_CSV = "../DATAS/ANSTAT2021_dataset_Clean.csv"
-OUTPUT_CLUSTERS_CSV = "../DATAS/ANSTAT2021_clusters_100.csv"
-OUTPUT_PROFILES_CSV = "../DATAS/ANSTAT2021_cluster_profiles_100.csv"
+OUTPUT_CLUSTERS_CSV = "../DATAS/ANSTAT2021_clusters_PC.csv"
+OUTPUT_PROFILES_CSV = "../DATAS/ANSTAT2021_cluster_profiles_PC.csv"
 RANDOM_STATE = 42
 K_MIN, K_MAX = 2, 100   # plage testée pour k
 

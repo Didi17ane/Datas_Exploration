@@ -19,6 +19,74 @@ def safe_sort_clusters(cluster_list):
         # Sinon, trier comme strings
         return sorted(cluster_list, key=str)
 
+# --- START: Diagnostic / explication des règles (définir AVANT usage) ---
+def _normalize_value(v):
+    if pd.isna(v):
+        return ""
+    return str(v).strip().upper()
+
+def _normalize_expected(vals):
+    if vals is None:
+        return set()
+    if isinstance(vals, list):
+        return set(_normalize_value(v) for v in vals if pd.notna(v))
+    return {_normalize_value(vals)}
+
+def _row_rule_detail(row, conds):
+    per_var = {}
+    total = 0
+    matched = 0
+    for var, expected in conds.items():
+        total += 1
+        if var not in row.index:
+            per_var[var] = False
+            continue
+        val = _normalize_value(row[var])
+        expected_set = _normalize_expected(expected)
+        ok = (val in expected_set)
+        per_var[var] = ok
+        if ok:
+            matched += 1
+    pct = matched / total if total > 0 else 0.0
+    return {"per_var": per_var, "total": total, "matched": matched, "pct": pct}
+
+def explain_rules_for_dataframe(df_rows, rules, top_k_candidates=3, sample_limit=200):
+    rows = df_rows.copy().reset_index()
+    if len(rows) > sample_limit:
+        rows = rows.head(sample_limit)
+
+    out = []
+    formatted = {}
+    for cid, rule in rules.items():
+        if isinstance(rule, list):
+            conds = {}
+            for r in rule:
+                if isinstance(r, dict):
+                    for k, v in r.items():
+                        conds[k] = v
+        elif isinstance(rule, dict):
+            conds = dict(rule)
+        else:
+            conds = {}
+        formatted[str(cid)] = conds
+
+    for _, row in rows.iterrows():
+        candidates = []
+        for cid, conds in formatted.items():
+            detail = _row_rule_detail(row, conds)
+            if detail["pct"] > 0:
+                candidates.append((cid, detail["pct"], detail["matched"], detail["total"], detail["per_var"]))
+        candidates = sorted(candidates, key=lambda x: x[1], reverse=True)
+        top = candidates[:top_k_candidates]
+        out.append({
+            "orig_index": row["index"],
+            "best_candidates": top,
+            "n_candidates": len(candidates),
+            "row_preview": {c: row.get(c, "") for c in ["age_num", "sex", "marital_status", "city", "milieu_resid", "region_name", "bancarise"] if c in row.index}
+        })
+    return pd.DataFrame(out)
+# --- END: Diagnostic / explication des règles ---
+
 st.set_page_config(page_title="Analyse des Clusters", layout="wide")
 st.title("🧬 Plateforme d'Analyse et Segmentation par Clusters")
 
@@ -190,10 +258,10 @@ if uploaded:
                 for var, vals in v.items()
             }
         
-        with open("./Rules Clusters/cluster_rules.json", "w", encoding="utf-8") as f:
+        with open("./Rules Clusters/cluster_rules_manual_example.json", "w", encoding="utf-8") as f:
             json.dump(rules_jsonable, f, ensure_ascii=False, indent=4)
         
-        st.info("💾 Règles sauvegardées dans `cluster_rules.json`")
+        st.info("💾 Règles sauvegardées dans `cluster_rules_manual_example.json`")
 
     # ==========================================================
     # EXPLORATION DES CLUSTERS
@@ -278,19 +346,45 @@ if uploaded2:
     
     # Charger les règles
     try:
-        with open("./Rules Clusters/cluster_rules.json", "r", encoding="utf-8") as f:
+        print("Attempting to load rules from JSON...")
+        with open("./Rules Clusters/cluster_rules_manual_example.json", "r", encoding="utf-8") as f:
             rules_loaded = json.load(f)
-        
+        print("Rules loaded successfully.")
         # Reconvertir au format attendu (forcer tous les clusters en int si possible)
         formatted_rules = {}
         for cluster_key, rule_dict in rules_loaded.items():
             # Essayer de convertir en int, sinon garder comme string
             try:
+                print(f"Converting cluster key: {cluster_key}")
                 cluster_id = int(float(cluster_key))
             except (ValueError, TypeError):
                 cluster_id = str(cluster_key)
-            formatted_rules[cluster_id] = {var: vals for var, vals in rule_dict.items()}
-        
+                print(f"Keeping cluster key as string: {cluster_id}")
+            print(f"Processing rules for cluster {cluster_id}: {rule_dict}")
+            
+            # Supporter deux formats possibles dans le JSON :
+            # - { "var": ["val1","val2"], ... }  (format dict)
+            # - [ { "var": ["val1"] }, { "var2": ["val2"] }, ... ] (ancienne version list of dicts)
+            cond_dict = {}
+            if isinstance(rule_dict, dict):
+                cond_dict = {str(k): v for k, v in rule_dict.items()}
+            elif isinstance(rule_dict, list):
+                for r in rule_dict:
+                    if isinstance(r, dict):
+                        for var, vals in r.items():
+                            cond_dict[str(var)] = vals
+                    else:
+                        print(f"Unexpected rule element type for cluster {cluster_id}: {type(r)}")
+            else:
+                print(f"Unsupported rule format for cluster {cluster_id}: {type(rule_dict)}")
+
+            formatted_rules[cluster_id] = cond_dict
+
+            #formatted_rules[cluster_id] = {var: vals for var, vals in rule_dict.items()}
+
+            print("OKIIIIIIIIIIIIIIIIIIIIIIIII")
+        print("Formatted rules successfully.")
+        print(f"Formatted rules: {formatted_rules}")
         st.info(f"✅ Règles chargées pour {len(formatted_rules)} clusters")
         
         if st.button("🔮 Prédire les clusters"):
@@ -341,6 +435,113 @@ if uploaded2:
             dist_sorted = dist.reindex(safe_sort_clusters(dist.index.tolist()), fill_value=0)
             
             st.bar_chart(dist_sorted)
+            
+            # --- INSERT DEBUG DIAGNOSTIC START ---
+            # Affiche diagnostic d'application des règles (non-assignés + vérif assignés)
+            # Récupère les règles formatées (peut provenir de la variable locale ou de la session)
+            rules_for_debug = formatted_rules if 'formatted_rules' in locals() else st.session_state.get("rules", {})
+            if rules_for_debug:
+                non_assignes = result[result["cluster_assigned"] == "Aucun"].copy()
+                assignes = result[result["cluster_assigned"] != "Aucun"].copy()
+
+                st.subheader("🔎 Diagnostic application des règles (aperçu)")
+
+                # Paramètres d'échantillon
+                sample_limit = st.number_input("Nombre de lignes à analyser (preview)", min_value=10, max_value=30000, value=200, step=10, key="dbg_sample")
+                top_k = st.number_input("Top clusters candidats à afficher par ligne", min_value=1, max_value=10, value=3, key="dbg_topk")
+
+                # Non-assignés
+                if len(non_assignes) > 0:
+                    st.markdown("### ❌ Non-assignés (échantillon)")
+                    # diagnostic sample (affichage)
+                    df_dbg_na = explain_rules_for_dataframe(non_assignes, rules_for_debug, top_k_candidates=top_k, sample_limit=sample_limit)
+                    # formater les candidats pour affichage lisible
+                    def fmt_cands(cands):
+                        return "; ".join([f"{cid} ({pct*100:.0f}%, {m}/{t})" for cid, pct, m, t, per in cands]) if cands else ""
+                    df_dbg_na["candidates_txt"] = df_dbg_na["best_candidates"].map(fmt_cands)
+                    st.dataframe(df_dbg_na[["orig_index", "n_candidates", "candidates_txt", "row_preview"]].head(200), use_container_width=True)
+                    st.download_button("📥 Télécharger diagnostic non-assignés (JSON)", data=df_dbg_na.to_json(orient="records", force_ascii=False).encode("utf-8"), file_name="debug_non_assignes.json", mime="application/json")
+                    
+                    # Options pour appliquer des réassignations aux non-assignés
+                    st.divider()
+                    st.write("### 🔁 Réassigner les non-assignés")
+                    method = st.radio(
+                        "Méthode de réassignation",
+                        options=[
+                            "Top-candidat (diagnostic) — utiliser le meilleur candidat trouvé",
+                            "Réappliquer les règles d'origine (assign_cluster_from_rules)"
+                        ],
+                        index=0
+                    )
+                    pct_threshold = st.slider("Seuil minimal (%) pour accepter une assignation", min_value=0, max_value=100, value=0, step=5, key="reassign_pct")
+                    
+                    # Optionnel : calculer les candidats pour l'ensemble des non-assignés (pas seulement l'échantillon)
+                    if st.checkbox("Calculer candidats pour tous les non-assignés (peut être lent)", value=False):
+                        df_dbg_na_full = explain_rules_for_dataframe(non_assignes, rules_for_debug, top_k_candidates=max(1, top_k), sample_limit=len(non_assignes))
+                    else:
+                        df_dbg_na_full = df_dbg_na.copy()
+                    
+                    if st.button("🛠️ Appliquer la réassignation aux non-assignés"):
+                        updated = st.session_state.get("result", result).copy()
+                        assigned_count = 0
+                        
+                        if method.startswith("Top-candidat"):
+                            # Utiliser le top-candidat extrait du diagnostic
+                            for _, r in df_dbg_na_full.iterrows():
+                                orig_idx = r["orig_index"]
+                                best = r["best_candidates"]
+                                if best and len(best) > 0:
+                                    top_cid, top_pct, matched, total, per_var = best[0]
+                                    if (top_pct * 100) >= pct_threshold:
+                                        if orig_idx in updated.index:
+                                            updated.at[orig_idx, "cluster_assigned"] = str(top_cid)
+                                            updated.at[orig_idx, "match_score"] = float(top_pct)
+                                            updated.at[orig_idx, "assigned_via"] = "top_candidate"
+                                            assigned_count += 1
+                        else:
+                            # Réappliquer les règles d'origine sur l'ensemble des non-assignés
+                            try:
+                                non_ass_df = non_assignes.copy()
+                                assigned_by_rules = assign_cluster_from_rules(non_ass_df, rules_for_debug)
+                                # parcourir et appliquer si score >= seuil et cluster != 'Aucun'
+                                for idx, row_ass in assigned_by_rules.iterrows():
+                                    cid = row_ass.get("cluster_assigned", "Aucun")
+                                    score = row_ass.get("match_score", 0.0)
+                                    if cid is not None and str(cid) != "Aucun" and (float(score) * 100) >= pct_threshold:
+                                        if idx in updated.index:
+                                            updated.at[idx, "cluster_assigned"] = str(cid)
+                                            updated.at[idx, "match_score"] = float(score)
+                                            updated.at[idx, "assigned_via"] = "reapplied_rules"
+                                            assigned_count += 1
+                            except Exception as e:
+                                st.error(f"Erreur lors de la réapplication des règles : {e}")
+                        
+                        # Sauvegarder et propager le changement pour la suite du code
+                        st.session_state["result"] = updated
+                        result = st.session_state["result"]
+                        st.success(f"✅ {assigned_count} individus réassignés (seuil {pct_threshold}%)")
+                        
+                        # Mettre à jour les variables locales utilisées plus bas
+                        non_assignes = result[result["cluster_assigned"] == "Aucun"].copy()
+                        assignes = result[result["cluster_assigned"] != "Aucun"].copy()
+                        
+                        # Rafraîchir l'affichage immédiat des diagnostics si nécessaire
+                        # st.rerun()  # Décommentez si vous avez Streamlit >= 1.27
+                else:
+                    st.info("Aucun non-assigné à diagnostiquer.")
+
+                # Assignés (vérification rapide)
+                if len(assignes) > 0:
+                    st.markdown("### ✅ Assignés (vérification rapide)")
+                    df_dbg_a = explain_rules_for_dataframe(assignes, rules_for_debug, top_k_candidates=top_k, sample_limit=min(sample_limit, 200))
+                    df_dbg_a["candidates_txt"] = df_dbg_a["best_candidates"].map(fmt_cands)
+                    st.dataframe(df_dbg_a[["orig_index", "n_candidates", "candidates_txt", "row_preview"]].head(200), use_container_width=True)
+                    st.download_button("📥 Télécharger diagnostic assignés (JSON)", data=df_dbg_a.to_json(orient="records", force_ascii=False).encode("utf-8"), file_name="debug_assignes.json", mime="application/json")
+                else:
+                    st.info("Aucun assigné à vérifier.")
+            else:
+                st.info("Aucune règle disponible pour le diagnostic (générez ou chargez les règles).")
+            # --- INSERT DEBUG DIAGNOSTIC END ---
             
             # Préparer le dataset final avec colonnes sélectionnées
             display_cols = ["cluster_assigned"]
