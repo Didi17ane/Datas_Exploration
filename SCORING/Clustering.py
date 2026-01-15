@@ -18,6 +18,7 @@ from sklearn.decomposition import PCA
 # 1) Paramètres
 # ==========
 INPUT_CSV = "../DATAS/ANSTAT2021_dataset_Clean.csv"
+# INPUT_CSV = "../DATAS/ANSTAT2021_dataset_AllVars_CLEAN.csv"
 OUTPUT_CLUSTERS_CSV = "../DATAS/ANSTAT2021_clusters_PC.csv"
 OUTPUT_PROFILES_CSV = "../DATAS/ANSTAT2021_cluster_profiles_PC.csv"
 RANDOM_STATE = 42
@@ -27,10 +28,10 @@ K_MIN, K_MAX = 2, 100   # plage testée pour k
 # 2) Chargement
 # ==========
 df = pd.read_csv(INPUT_CSV)
-print(f"✅  Chargé : {INPUT_CSV} | shape={df.shape}")
+print(f"✅  Chargé : {INPUT_CSV} | shape={df.shape} ✅")
 
 # ==========
-# 3) Variables pour le clustering
+# 3) Variables pour le clustering 
 #    Démarrage = variables communes (cohérence inter-bases)
 # ==========
 num_vars = [
@@ -44,6 +45,7 @@ cat_vars = [
     "sex",
     "marital_status",
     "city",
+    "milieu_resid",
     "region_name",
     "bancarise",
 ]
@@ -186,6 +188,9 @@ for c in sorted(df["cluster"].unique()):
         row["ville_mode"] = sub["city"].mode(dropna=True).iloc[0] if not sub["city"].mode(dropna=True).empty else np.nan  
          
     # répartition milieu/region (top 1)
+    if "milieu_resid" in sub.columns:
+        row["milieu_resid_mode"] = sub["milieu_resid"].mode(dropna=True).iloc[0] if not sub["milieu_resid"].mode(dropna=True).empty else np.nan
+
     if "region_name" in sub.columns:
         row["region_mode"] = sub["region_name"].mode(dropna=True).iloc[0] if not sub["region_name"].mode(dropna=True).empty else np.nan
         
